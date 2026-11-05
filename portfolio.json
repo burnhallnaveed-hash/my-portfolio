@@ -1,25 +1,37 @@
 {
   "settings": {
-    "owner": "burnhallnaveed-hash",
-    "repo": "my-portfolio",
-    "branch": "master",
-    "name": "Your Name",
+    "name": "Design Corner",
     "title": "Architecture & 3D Visualization",
     "tagline": "Transforming Visions Into Reality",
-    "email": "your.email@gmail.com",
-    "phone": "+92 300 0000000",
-    "about": "I am a professional architect and 3D visualization artist specializing in architectural renderings, interior design visualization, product design, and motion animations. With a passion for bringing architectural visions to life, I create stunning photorealistic renders that help clients visualize their projects before construction begins.",
-    "instagram": "",
-    "linkedin": "",
-    "behance": ""
+    "email": "designcorner488@gmail.com",
+    "phone": "+923392332272",
+    "about": "I am a professional architect and 3D visualization artist specializing in architectural renderings, interior design visualization, product design, and motion animations. With a passion for bringing architectural visions to life, I create stunning photorealistic renders that help clients visualize their projects before construction begins."
   },
   "categories": [
-    { "id": "all", "label": "All Work" },
-    { "id": "architecture", "label": "Architecture" },
-    { "id": "interior", "label": "Interiors" },
-    { "id": "product", "label": "Product Design" },
-    { "id": "graphics", "label": "Graphics" },
-    { "id": "animation", "label": "Animations" }
+    {
+      "id": "all",
+      "label": "All Work"
+    },
+    {
+      "id": "architecture",
+      "label": "Architecture"
+    },
+    {
+      "id": "interior",
+      "label": "Interiors"
+    },
+    {
+      "id": "product",
+      "label": "Product Design"
+    },
+    {
+      "id": "graphics",
+      "label": "Graphics"
+    },
+    {
+      "id": "animation",
+      "label": "Animations"
+    }
   ],
   "projects": [
     {
