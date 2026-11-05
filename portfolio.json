@@ -35,6 +35,17 @@
   ],
   "projects": [
     {
+      "id": "proj_1793906516032",
+      "title": "USA   house Design",
+      "category": "architecture",
+      "type": "image",
+      "src": "https://raw.githubusercontent.com/burnhallnaveed-hash/my-portfolio/master/images/1793906345433-44.jpeg",
+      "thumbnail": "https://raw.githubusercontent.com/burnhallnaveed-hash/my-portfolio/master/images/1793906345433-44.jpeg",
+      "description": "A contemporary two-story American suburban residence designed with a focus on seamless indoor-outdoor living, spatial ergonomics, and modern aesthetic elegance. The architecture features expansive floor-to-ceiling glass windows that flood the interior with natural daylight, complemented by warm evening facade lighting, a spacious multi-level balcony, and an integrated outdoor poolside entertainment deck. The material palette blends clean white vertical paneling with rich timber accents, balancing modern minimalism with timeless residential comfort.",
+      "featured": false,
+      "date": "2026-11-05"
+    },
+    {
       "id": "demo-1",
       "title": "Modern Villa Rendering",
       "category": "architecture",
