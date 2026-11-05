@@ -1,392 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Professional Portfolio Website - Developer, Designer & Creator. Showcasing projects, skills, and experience." />
-  <meta name="keywords" content="portfolio, developer, designer, web development, programming" />
-  <meta name="author" content="Your Name" />
-  <meta property="og:title" content="Your Name | Portfolio" />
-  <meta property="og:description" content="Professional Portfolio Website - Developer, Designer & Creator" />
-  <meta property="og:type" content="website" />
-  <title>Your Name | Portfolio</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Professional Architecture & 3D Visualization Portfolio — Photorealistic Renderings, Animations, Interior Design"/>
+  <meta name="keywords" content="architecture, 3D visualization, rendering, interior design, animation, portfolio"/>
+  <meta property="og:title" content="Architecture & 3D Visualization Portfolio"/>
+  <meta property="og:description" content="Professional photorealistic architectural renderings and animations"/>
+  <meta property="og:type" content="website"/>
+  <title>Architecture & 3D Visualization</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-  <!-- ===== NAVBAR ===== -->
+  <!-- NAVBAR -->
   <nav class="navbar" id="navbar">
-    <div class="nav-container">
+    <div class="nav-inner">
       <a href="#home" class="nav-logo">
-        <span class="logo-bracket">&lt;</span>YN<span class="logo-bracket">/&gt;</span>
+        <span class="logo-line"></span>
+        <span class="logo-text">STUDIO</span>
+        <span class="logo-line"></span>
       </a>
       <ul class="nav-links" id="nav-links">
-        <li><a href="#home" class="nav-link active">Home</a></li>
+        <li><a href="#home" class="nav-link">Home</a></li>
+        <li><a href="#work" class="nav-link">Work</a></li>
         <li><a href="#about" class="nav-link">About</a></li>
-        <li><a href="#skills" class="nav-link">Skills</a></li>
-        <li><a href="#projects" class="nav-link">Projects</a></li>
         <li><a href="#contact" class="nav-link">Contact</a></li>
       </ul>
-      <a href="#contact" class="btn btn-primary nav-cta">Hire Me</a>
-      <button class="hamburger" id="hamburger" aria-label="Toggle Menu">
-        <span></span><span></span><span></span>
-      </button>
+      <div class="nav-right">
+        <a href="admin/" class="btn-admin" title="Admin Panel">⚙</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
     </div>
   </nav>
 
-  <!-- ===== HERO SECTION ===== -->
+  <!-- HERO -->
   <section class="hero" id="home">
-    <div class="hero-bg-image"></div>
-    <div class="particles" id="particles"></div>
+    <div class="hero-bg">
+      <div class="hero-overlay"></div>
+      <div class="hero-grid-pattern"></div>
+    </div>
     <div class="hero-content">
-      <div class="hero-badge">
-        <span class="badge-dot"></span>
-        Available for Work
-      </div>
-      <h1 class="hero-title">
-        Hi, I'm <span class="gradient-text">Your Name</span>
+      <div class="hero-eyebrow" id="hero-eyebrow">Architecture & 3D Visualization</div>
+      <h1 class="hero-title" id="hero-title">
+        <span class="hero-line">Transforming</span>
+        <span class="hero-line hero-italic" id="hero-tagline">Visions</span>
+        <span class="hero-line">Into Reality</span>
       </h1>
-      <div class="hero-subtitle-wrapper">
-        <span class="hero-subtitle-static">I'm a&nbsp;</span>
-        <span class="hero-typewriter" id="typewriter"></span>
-        <span class="cursor-blink">|</span>
+      <p class="hero-desc" id="hero-desc">Photorealistic architectural renderings, 3D animations,<br/>interior design & product visualization</p>
+      <div class="hero-actions">
+        <a href="#work" class="btn-gold" id="hero-work-btn">View Portfolio</a>
+        <a href="#contact" class="btn-ghost" id="hero-contact-btn">Start a Project</a>
       </div>
-      <p class="hero-description">
-        I build beautiful, fast, and scalable digital experiences. 
-        Passionate about clean code, great design, and solving real-world problems.
-      </p>
-      <div class="hero-buttons">
-        <a href="#projects" class="btn btn-primary" id="view-work-btn">View My Work</a>
-        <a href="#contact" class="btn btn-outline" id="contact-btn">Get In Touch</a>
-      </div>
-      <div class="hero-stats">
-        <div class="stat">
-          <span class="stat-number" data-target="20">0</span><span class="stat-plus">+</span>
-          <span class="stat-label">Projects</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-number" data-target="2">0</span><span class="stat-plus">+</span>
-          <span class="stat-label">Years Exp.</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-number" data-target="15">0</span><span class="stat-plus">+</span>
-          <span class="stat-label">Clients</span>
-        </div>
+      <div class="hero-scroll">
+        <div class="scroll-line"></div>
+        <span>Scroll</span>
       </div>
     </div>
-    <div class="scroll-indicator">
-      <span>Scroll Down</span>
-      <div class="scroll-arrow"></div>
+    <div class="hero-counter" id="hero-counter">
+      <div class="hc-item"><span class="hc-num" id="stat-projects">0</span><span class="hc-label">Projects</span></div>
+      <div class="hc-sep"></div>
+      <div class="hc-item"><span class="hc-num" id="stat-clients">0</span><span class="hc-label">Clients</span></div>
+      <div class="hc-sep"></div>
+      <div class="hc-item"><span class="hc-num" id="stat-years">0</span><span class="hc-label">Years Exp.</span></div>
     </div>
   </section>
 
-  <!-- ===== ABOUT SECTION ===== -->
-  <section class="about section" id="about">
+  <!-- PORTFOLIO SECTION -->
+  <section class="work-section" id="work">
     <div class="container">
-      <div class="section-header">
-        <span class="section-tag">About Me</span>
-        <h2 class="section-title">Who Am I?</h2>
-        <p class="section-subtitle">A passionate developer with an eye for design</p>
+      <div class="section-head">
+        <div class="sh-left">
+          <span class="sh-tag">Portfolio</span>
+          <h2 class="sh-title">Selected Work</h2>
+        </div>
+        <p class="sh-desc">Every project is a unique story — crafted with precision and passion</p>
       </div>
+
+      <!-- FILTER TABS -->
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-btn active" data-cat="all" id="filter-all">All Work</button>
+        <button class="filter-btn" data-cat="architecture" id="filter-architecture">Architecture</button>
+        <button class="filter-btn" data-cat="interior" id="filter-interior">Interiors</button>
+        <button class="filter-btn" data-cat="product" id="filter-product">Product Design</button>
+        <button class="filter-btn" data-cat="graphics" id="filter-graphics">Graphics</button>
+        <button class="filter-btn" data-cat="animation" id="filter-animation">Animations</button>
+      </div>
+
+      <!-- GALLERY GRID -->
+      <div class="gallery-grid" id="gallery-grid">
+        <div class="gallery-loading" id="gallery-loading">
+          <div class="loading-spinner"></div>
+          <p>Loading portfolio...</p>
+        </div>
+      </div>
+
+      <div class="gallery-empty" id="gallery-empty" style="display:none;">
+        <div class="empty-icon">🎨</div>
+        <h3>No projects yet</h3>
+        <p>Go to the <a href="admin/">Admin Panel</a> to add your first project.</p>
+      </div>
+
+      <div class="load-more-wrap" id="load-more-wrap" style="display:none;">
+        <button class="btn-gold" id="load-more-btn">Load More Work</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT SECTION -->
+  <section class="about-section" id="about">
+    <div class="container">
       <div class="about-grid">
-        <div class="about-image-wrapper">
-          <div class="about-image-frame">
-            <div class="profile-avatar">
-              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="100" cy="80" r="45" fill="#6366f1" opacity="0.9"/>
-                <ellipse cx="100" cy="175" rx="65" ry="45" fill="#6366f1" opacity="0.9"/>
-              </svg>
-              <div class="avatar-initials">YN</div>
+        <div class="about-left">
+          <span class="sh-tag">About</span>
+          <h2 class="sh-title about-title" id="about-title">The Studio</h2>
+          <p class="about-text" id="about-text">Loading...</p>
+          <div class="about-services">
+            <div class="service-item">
+              <span class="si-icon">🏛️</span>
+              <div><strong>Architecture Rendering</strong><small>Exterior & Interior Visualizations</small></div>
             </div>
-            <div class="image-glow"></div>
-          </div>
-          <div class="about-card floating-card">
-            <span class="card-icon">🚀</span>
-            <div>
-              <strong>Full Stack Dev</strong>
-              <small>Frontend & Backend</small>
+            <div class="service-item">
+              <span class="si-icon">🎬</span>
+              <div><strong>3D Animation</strong><small>Walkthrough & Flythrough Videos</small></div>
+            </div>
+            <div class="service-item">
+              <span class="si-icon">📦</span>
+              <div><strong>Product Visualization</strong><small>360° Product Renders</small></div>
+            </div>
+            <div class="service-item">
+              <span class="si-icon">✏️</span>
+              <div><strong>Graphics & Branding</strong><small>Visual Identity & Design</small></div>
             </div>
           </div>
+          <a href="#contact" class="btn-gold">Work With Me</a>
         </div>
-        <div class="about-content">
-          <h3>Building the future, one line of code at a time.</h3>
-          <p>
-            I'm a passionate <strong>Full Stack Developer</strong> based in Pakistan 🇵🇰, 
-            with expertise in building modern web applications. I love turning complex problems 
-            into simple, beautiful, and intuitive solutions.
-          </p>
-          <p>
-            When I'm not coding, you'll find me exploring new technologies, contributing to 
-            open-source projects, or sharing knowledge with the developer community.
-          </p>
-          <div class="about-highlights">
-            <div class="highlight-item">
-              <span class="highlight-icon">📍</span>
-              <span>Based in Pakistan</span>
+        <div class="about-right">
+          <div class="about-visual">
+            <div class="av-box av-box-1"></div>
+            <div class="av-box av-box-2"></div>
+            <div class="av-initials" id="av-initials">YN</div>
+            <div class="av-badge">
+              <span>✦</span>
+              <strong id="av-title">Architecture & 3D</strong>
+              <small>Visualization Studio</small>
             </div>
-            <div class="highlight-item">
-              <span class="highlight-icon">🎓</span>
-              <span>CS / Software Engineering Graduate</span>
-            </div>
-            <div class="highlight-item">
-              <span class="highlight-icon">💼</span>
-              <span>Open to Freelance & Full-time</span>
-            </div>
-            <div class="highlight-item">
-              <span class="highlight-icon">🌐</span>
-              <span>English & Urdu Speaker</span>
-            </div>
-          </div>
-          <a href="#" class="btn btn-primary" id="download-cv-btn">Download CV</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== SKILLS SECTION ===== -->
-  <section class="skills section" id="skills">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">My Stack</span>
-        <h2 class="section-title">Skills & Technologies</h2>
-        <p class="section-subtitle">Tools and technologies I work with</p>
-      </div>
-      <div class="skills-grid">
-        <div class="skill-category">
-          <h3 class="skill-cat-title"><span>🎨</span> Frontend</h3>
-          <div class="skill-items">
-            <div class="skill-item" data-level="90">
-              <div class="skill-info"><span>HTML5 / CSS3</span><span>90%</span></div>
-              <div class="skill-bar"><div class="skill-progress" data-width="90"></div></div>
-            </div>
-            <div class="skill-item" data-level="85">
-              <div class="skill-info"><span>JavaScript (ES6+)</span><span>85%</span></div>
-              <div class="skill-bar"><div class="skill-progress" data-width="85"></div></div>
-            </div>
-            <div class="skill-item" data-level="80">
-              <div class="skill-info"><span>React.js</span><span>80%</span></div>
-              <div class="skill-bar"><div class="skill-progress" data-width="80"></div></div>
-            </div>
-          </div>
-        </div>
-        <div class="skill-category">
-          <h3 class="skill-cat-title"><span>⚙️</span> Backend</h3>
-          <div class="skill-items">
-            <div class="skill-item">
-              <div class="skill-info"><span>Node.js / Express</span><span>75%</span></div>
-              <div class="skill-bar"><div class="skill-progress" data-width="75"></div></div>
-            </div>
-            <div class="skill-item">
-              <div class="skill-info"><span>Python / Django</span><span>70%</span></div>
-              <div class="skill-bar"><div class="skill-progress" data-width="70"></div></div>
-            </div>
-            <div class="skill-item">
-              <div class="skill-info"><span>MongoDB / MySQL</span><span>75%</span></div>
-              <div class="skill-bar"><div class="skill-progress" data-width="75"></div></div>
-            </div>
-          </div>
-        </div>
-        <div class="skill-category">
-          <h3 class="skill-cat-title"><span>🛠️</span> Tools & Others</h3>
-          <div class="tech-tags">
-            <span class="tech-tag">Git & GitHub</span>
-            <span class="tech-tag">VS Code</span>
-            <span class="tech-tag">Figma</span>
-            <span class="tech-tag">Docker</span>
-            <span class="tech-tag">Linux</span>
-            <span class="tech-tag">REST APIs</span>
-            <span class="tech-tag">Tailwind CSS</span>
-            <span class="tech-tag">Firebase</span>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== PROJECTS SECTION ===== -->
-  <section class="projects section" id="projects">
+  <!-- CONTACT SECTION -->
+  <section class="contact-section" id="contact">
     <div class="container">
-      <div class="section-header">
-        <span class="section-tag">My Work</span>
-        <h2 class="section-title">Featured Projects</h2>
-        <p class="section-subtitle">Some things I've built</p>
-      </div>
-      <div class="projects-grid">
-
-        <div class="project-card" id="project-1">
-          <div class="project-card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-            <div class="project-icon">🛒</div>
-          </div>
-          <div class="project-card-body">
-            <div class="project-tags">
-              <span class="p-tag">React</span>
-              <span class="p-tag">Node.js</span>
-              <span class="p-tag">MongoDB</span>
-            </div>
-            <h3>E-Commerce Platform</h3>
-            <p>A full-featured online store with product listings, cart, payment integration, and admin dashboard.</p>
-            <div class="project-links">
-              <a href="#" class="btn btn-sm btn-primary" id="proj1-demo">Live Demo</a>
-              <a href="#" class="btn btn-sm btn-ghost" id="proj1-code">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-                Code
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div class="project-card featured" id="project-2">
-          <div class="featured-badge">⭐ Featured</div>
-          <div class="project-card-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-            <div class="project-icon">🤖</div>
-          </div>
-          <div class="project-card-body">
-            <div class="project-tags">
-              <span class="p-tag">Python</span>
-              <span class="p-tag">AI/ML</span>
-              <span class="p-tag">FastAPI</span>
-            </div>
-            <h3>AI Chat Assistant</h3>
-            <p>An intelligent chatbot powered by machine learning that can answer questions and provide recommendations.</p>
-            <div class="project-links">
-              <a href="#" class="btn btn-sm btn-primary" id="proj2-demo">Live Demo</a>
-              <a href="#" class="btn btn-sm btn-ghost" id="proj2-code">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-                Code
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div class="project-card" id="project-3">
-          <div class="project-card-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-            <div class="project-icon">📊</div>
-          </div>
-          <div class="project-card-body">
-            <div class="project-tags">
-              <span class="p-tag">JavaScript</span>
-              <span class="p-tag">Chart.js</span>
-              <span class="p-tag">Firebase</span>
-            </div>
-            <h3>Analytics Dashboard</h3>
-            <p>A real-time analytics dashboard with beautiful charts, data visualization, and user management.</p>
-            <div class="project-links">
-              <a href="#" class="btn btn-sm btn-primary" id="proj3-demo">Live Demo</a>
-              <a href="#" class="btn btn-sm btn-ghost" id="proj3-code">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-                Code
-              </a>
-            </div>
-          </div>
-        </div>
-
-      </div>
-      <div class="projects-cta">
-        <a href="https://github.com/yourusername" class="btn btn-outline" id="github-all-btn" target="_blank">View All Projects on GitHub</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== CONTACT SECTION ===== -->
-  <section class="contact section" id="contact">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">Get In Touch</span>
-        <h2 class="section-title">Contact Me</h2>
-        <p class="section-subtitle">Let's work together on something great</p>
-      </div>
-      <div class="contact-grid">
-        <div class="contact-info">
-          <h3>Let's talk! 👋</h3>
-          <p>I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision. Feel free to reach out!</p>
-          <div class="contact-links">
-            <a href="mailto:your.email@gmail.com" class="contact-link" id="email-link">
-              <div class="contact-link-icon">✉️</div>
-              <div>
-                <strong>Email</strong>
-                <span>your.email@gmail.com</span>
-              </div>
+      <div class="contact-inner">
+        <div class="contact-left">
+          <span class="sh-tag">Contact</span>
+          <h2 class="sh-title">Start a Project</h2>
+          <p>Ready to bring your vision to life? Let's talk about your project and create something extraordinary together.</p>
+          <div class="contact-details">
+            <a href="#" class="cd-item" id="cd-email-link">
+              <span class="cd-icon">✉</span>
+              <span id="cd-email">your.email@gmail.com</span>
             </a>
-            <a href="https://linkedin.com/in/yourprofile" class="contact-link" id="linkedin-link" target="_blank">
-              <div class="contact-link-icon">💼</div>
-              <div>
-                <strong>LinkedIn</strong>
-                <span>linkedin.com/in/yourprofile</span>
-              </div>
-            </a>
-            <a href="https://github.com/yourusername" class="contact-link" id="github-link" target="_blank">
-              <div class="contact-link-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-              </div>
-              <div>
-                <strong>GitHub</strong>
-                <span>github.com/yourusername</span>
-              </div>
+            <a href="#" class="cd-item" id="cd-phone-link">
+              <span class="cd-icon">📱</span>
+              <span id="cd-phone">+92 300 0000000</span>
             </a>
           </div>
         </div>
         <form class="contact-form" id="contact-form" novalidate>
-          <div class="form-group">
-            <label for="name">Your Name</label>
-            <input type="text" id="name" name="name" placeholder="John Doe" required />
+          <div class="cf-row">
+            <div class="cf-group">
+              <label for="cf-name">Name</label>
+              <input type="text" id="cf-name" placeholder="Your Name" required/>
+            </div>
+            <div class="cf-group">
+              <label for="cf-email">Email</label>
+              <input type="email" id="cf-email" placeholder="your@email.com" required/>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="john@example.com" required />
+          <div class="cf-group">
+            <label for="cf-service">Service</label>
+            <select id="cf-service">
+              <option value="">Select a Service</option>
+              <option value="architecture">Architecture Rendering</option>
+              <option value="interior">Interior Visualization</option>
+              <option value="animation">3D Animation</option>
+              <option value="product">Product Design</option>
+              <option value="graphics">Graphics & Branding</option>
+            </select>
           </div>
-          <div class="form-group">
-            <label for="subject">Subject</label>
-            <input type="text" id="subject" name="subject" placeholder="Project Discussion" />
+          <div class="cf-group">
+            <label for="cf-message">Message</label>
+            <textarea id="cf-message" rows="4" placeholder="Tell me about your project..."></textarea>
           </div>
-          <div class="form-group">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" placeholder="Tell me about your project..." rows="5" required></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary btn-full" id="submit-btn">
-            <span>Send Message</span>
-            <span class="btn-arrow">→</span>
+          <button type="submit" class="btn-gold btn-full" id="cf-submit">
+            Send Message <span>→</span>
           </button>
-          <div class="form-note">* Form uses mailto: by default. Connect with Formspree or EmailJS for full functionality.</div>
         </form>
       </div>
     </div>
   </section>
 
-  <!-- ===== FOOTER ===== -->
+  <!-- FOOTER -->
   <footer class="footer">
     <div class="container">
-      <div class="footer-top">
-        <a href="#home" class="nav-logo">
-          <span class="logo-bracket">&lt;</span>YN<span class="logo-bracket">/&gt;</span>
-        </a>
-        <ul class="footer-links">
-          <li><a href="#about">About</a></li>
-          <li><a href="#skills">Skills</a></li>
-          <li><a href="#projects">Projects</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-        <div class="social-links">
-          <a href="https://github.com/yourusername" class="social-link" id="footer-github" target="_blank" aria-label="GitHub">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-          </a>
-          <a href="https://linkedin.com/in/yourprofile" class="social-link" id="footer-linkedin" target="_blank" aria-label="LinkedIn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-          </a>
-          <a href="mailto:your.email@gmail.com" class="social-link" id="footer-email" aria-label="Email">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 4 10 8 10-8"/></svg>
-          </a>
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="logo-text" id="footer-name">Your Name</span>
+          <small id="footer-title">Architecture & 3D Visualization</small>
+        </div>
+        <div class="footer-links">
+          <a href="#work">Portfolio</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+          <a href="admin/">Admin</a>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© <span id="year"></span> Your Name. All rights reserved. | Built with ❤️ &amp; hosted on <a href="https://pages.github.com" target="_blank">GitHub Pages</a></p>
+        <p>© <span id="footer-year"></span> <span id="footer-name-2">Your Name</span> — All Rights Reserved</p>
+        <p>Hosted on <a href="https://pages.github.com" target="_blank">GitHub Pages</a></p>
       </div>
     </div>
   </footer>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+    <button class="lb-close" id="lb-close" aria-label="Close">✕</button>
+    <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous">‹</button>
+    <button class="lb-nav lb-next" id="lb-next" aria-label="Next">›</button>
+    <div class="lb-content" id="lb-content"></div>
+    <div class="lb-info">
+      <h3 id="lb-title"></h3>
+      <p id="lb-desc"></p>
+    </div>
+    <div class="lb-counter" id="lb-counter"></div>
+  </div>
 
   <script src="script.js"></script>
 </body>

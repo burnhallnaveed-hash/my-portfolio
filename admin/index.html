@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>Admin Panel — Portfolio CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-box">
+      <div class="login-logo">⚙</div>
+      <h1>Portfolio Admin</h1>
+      <p>Enter your password to access the control panel</p>
+      <form id="login-form" novalidate>
+        <div class="form-group">
+          <label for="login-pass">Password</label>
+          <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password"/>
+        </div>
+        <div id="login-error" class="error-msg" style="display:none;">❌ Incorrect password</div>
+        <button type="submit" class="btn-primary btn-full">Login →</button>
+      </form>
+      <div class="login-hint">
+        <small>Default password: <code>admin123</code> (change in Settings)</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SETUP SCREEN (GitHub Token) ===== -->
+  <div class="setup-screen" id="setup-screen" style="display:none;">
+    <div class="setup-box">
+      <div class="setup-icon">🔑</div>
+      <h2>One-Time Setup</h2>
+      <p>To save and publish changes to GitHub, you need a GitHub Personal Access Token (PAT). This is a one-time setup.</p>
+
+      <div class="setup-steps">
+        <div class="step"><span class="step-num">1</span><div><strong>Go to GitHub Settings</strong><a href="https://github.com/settings/tokens/new?scopes=repo&description=Portfolio+Admin" target="_blank" class="step-link">Click here to create token →</a></div></div>
+        <div class="step"><span class="step-num">2</span><div><strong>Set expiration</strong><small>Select "No expiration" or a date far in future</small></div></div>
+        <div class="step"><span class="step-num">3</span><div><strong>Check "repo" scope</strong><small>Make sure the "repo" checkbox is selected</small></div></div>
+        <div class="step"><span class="step-num">4</span><div><strong>Click "Generate token"</strong><small>Copy the token (starts with ghp_...)</small></div></div>
+        <div class="step"><span class="step-num">5</span><div><strong>Paste below</strong></div></div>
+      </div>
+
+      <div class="form-group">
+        <label for="gh-token">GitHub Personal Access Token</label>
+        <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"/>
+      </div>
+      <div id="token-error" class="error-msg" style="display:none;"></div>
+      <button class="btn-primary btn-full" id="save-token-btn">Save Token & Continue →</button>
+      <div class="setup-note">🔒 Token is stored locally in your browser only. Never shared with anyone.</div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN ADMIN PANEL ===== -->
+  <div class="admin-layout" id="admin-panel" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-logo">
+        <span class="sb-icon">⚙</span>
+        <div>
+          <strong>Admin Panel</strong>
+          <small>Portfolio CMS</small>
+        </div>
+      </div>
+      <nav class="sb-nav">
+        <button class="sb-link active" data-view="dashboard" id="nav-dashboard">
+          <span>📊</span> Dashboard
+        </button>
+        <button class="sb-link" data-view="projects" id="nav-projects">
+          <span>🖼️</span> Projects
+        </button>
+        <button class="sb-link" data-view="add-project" id="nav-add">
+          <span>➕</span> Add Project
+        </button>
+        <button class="sb-link" data-view="settings" id="nav-settings">
+          <span>⚙️</span> Settings
+        </button>
+      </nav>
+      <div class="sb-footer">
+        <a href="../" target="_blank" class="sb-link sb-view-site">
+          <span>🌐</span> View Website
+        </a>
+        <button class="sb-link sb-logout" id="logout-btn">
+          <span>🚪</span> Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="admin-main">
+
+      <!-- DASHBOARD VIEW -->
+      <div class="view active" id="view-dashboard">
+        <div class="view-header">
+          <h2>Dashboard</h2>
+          <button class="btn-primary" id="dash-add-btn">+ Add New Project</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="sc-num" id="dash-total">—</span>
+            <span class="sc-label">Total Projects</span>
+          </div>
+          <div class="stat-card">
+            <span class="sc-num" id="dash-images">—</span>
+            <span class="sc-label">Images</span>
+          </div>
+          <div class="stat-card">
+            <span class="sc-num" id="dash-videos">—</span>
+            <span class="sc-label">Animations/Videos</span>
+          </div>
+          <div class="stat-card">
+            <span class="sc-num" id="dash-featured">—</span>
+            <span class="sc-label">Featured</span>
+          </div>
+        </div>
+        <div class="dash-recent">
+          <h3>Recent Projects</h3>
+          <div class="recent-grid" id="recent-grid"></div>
+        </div>
+      </div>
+
+      <!-- PROJECTS VIEW -->
+      <div class="view" id="view-projects">
+        <div class="view-header">
+          <h2>All Projects</h2>
+          <div class="view-header-actions">
+            <select id="proj-filter-cat" class="filter-select">
+              <option value="all">All Categories</option>
+            </select>
+            <button class="btn-primary" id="proj-add-btn">+ Add Project</button>
+          </div>
+        </div>
+        <div class="projects-table" id="projects-table">
+          <div class="table-loading">Loading...</div>
+        </div>
+      </div>
+
+      <!-- ADD / EDIT PROJECT VIEW -->
+      <div class="view" id="view-add-project">
+        <div class="view-header">
+          <h2 id="form-title">Add New Project</h2>
+          <button class="btn-outline" id="cancel-form-btn">← Cancel</button>
+        </div>
+
+        <form id="project-form" novalidate>
+          <input type="hidden" id="edit-id"/>
+
+          <div class="form-grid">
+            <div class="form-col">
+              <div class="form-group">
+                <label for="p-title">Project Title *</label>
+                <input type="text" id="p-title" placeholder="e.g. Modern Villa Rendering" required/>
+              </div>
+              <div class="form-group">
+                <label for="p-category">Category *</label>
+                <select id="p-category" required>
+                  <option value="">Select Category</option>
+                  <option value="architecture">Architecture</option>
+                  <option value="interior">Interiors</option>
+                  <option value="product">Product Design</option>
+                  <option value="graphics">Graphics</option>
+                  <option value="animation">Animations</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="p-type">Media Type *</label>
+                <select id="p-type" required>
+                  <option value="image">Image (JPG/PNG Rendering)</option>
+                  <option value="youtube">YouTube Video</option>
+                  <option value="vimeo">Vimeo Video</option>
+                  <option value="video">MP4 Video (upload)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="p-desc">Description</label>
+                <textarea id="p-desc" rows="4" placeholder="Describe this project..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="p-featured"/>
+                  <span>Mark as Featured</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-col">
+              <!-- IMAGE UPLOAD -->
+              <div class="media-section" id="media-image">
+                <div class="form-group">
+                  <label>Upload Image (JPG/PNG)</label>
+                  <div class="upload-zone" id="image-upload-zone">
+                    <div class="uz-icon">🖼️</div>
+                    <div class="uz-text">
+                      <strong>Drag & Drop Image Here</strong>
+                      <small>or click to browse</small>
+                    </div>
+                    <input type="file" id="image-file-input" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none"/>
+                  </div>
+                  <div class="upload-preview" id="image-preview" style="display:none;">
+                    <img id="preview-img" src="" alt="Preview"/>
+                    <button type="button" class="remove-preview" id="remove-image">✕ Remove</button>
+                  </div>
+                  <div class="upload-progress" id="upload-progress" style="display:none;">
+                    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                    <span id="progress-text">Uploading...</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="p-img-url">Or Paste Image URL</label>
+                  <input type="url" id="p-img-url" placeholder="https://example.com/image.jpg"/>
+                </div>
+              </div>
+
+              <!-- YOUTUBE INPUT -->
+              <div class="media-section" id="media-youtube" style="display:none;">
+                <div class="form-group">
+                  <label for="p-yt-url">YouTube URL *</label>
+                  <input type="url" id="p-yt-url" placeholder="https://www.youtube.com/watch?v=..."/>
+                  <small class="field-hint">Paste the full YouTube link</small>
+                </div>
+                <div class="form-group">
+                  <label for="p-yt-thumb">Thumbnail Image URL (optional)</label>
+                  <input type="url" id="p-yt-thumb" placeholder="https://...thumbnail.jpg"/>
+                </div>
+              </div>
+
+              <!-- VIMEO INPUT -->
+              <div class="media-section" id="media-vimeo" style="display:none;">
+                <div class="form-group">
+                  <label for="p-vim-url">Vimeo URL *</label>
+                  <input type="url" id="p-vim-url" placeholder="https://vimeo.com/..."/>
+                </div>
+                <div class="form-group">
+                  <label for="p-vim-thumb">Thumbnail Image URL (optional)</label>
+                  <input type="url" id="p-vim-thumb" placeholder="https://...thumbnail.jpg"/>
+                </div>
+              </div>
+
+              <!-- MP4 VIDEO UPLOAD -->
+              <div class="media-section" id="media-video" style="display:none;">
+                <div class="form-group">
+                  <label>Upload MP4 Video (max 25MB)</label>
+                  <div class="upload-zone" id="video-upload-zone">
+                    <div class="uz-icon">🎬</div>
+                    <div class="uz-text">
+                      <strong>Drag & Drop MP4 Video</strong>
+                      <small>Max size: 25MB</small>
+                    </div>
+                    <input type="file" id="video-file-input" accept="video/mp4,video/webm" style="display:none"/>
+                  </div>
+                  <div id="video-name" class="file-name-display" style="display:none;"></div>
+                  <div class="upload-progress" id="video-upload-progress" style="display:none;">
+                    <div class="progress-bar"><div class="progress-fill" id="video-progress-fill"></div></div>
+                    <span id="video-progress-text">Uploading...</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="p-vid-thumb">Thumbnail Image URL</label>
+                  <input type="url" id="p-vid-thumb" placeholder="https://...thumbnail.jpg"/>
+                </div>
+              </div>
+
+              <!-- PREVIEW BOX -->
+              <div class="preview-card" id="form-preview" style="display:none;">
+                <h4>Preview</h4>
+                <div class="pc-thumb" id="pc-thumb"></div>
+                <div class="pc-title" id="pc-title"></div>
+                <div class="pc-cat" id="pc-cat"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="form-error" class="error-msg" style="display:none;"></div>
+          <div class="form-actions">
+            <button type="button" class="btn-outline" id="cancel-form-btn-2">Cancel</button>
+            <button type="submit" class="btn-primary" id="save-project-btn">
+              <span id="save-btn-text">Publish to Website →</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- SETTINGS VIEW -->
+      <div class="view" id="view-settings">
+        <div class="view-header">
+          <h2>Site Settings</h2>
+        </div>
+        <form id="settings-form">
+          <div class="settings-section">
+            <h3>Personal Information</h3>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Your Name</label>
+                <input type="text" id="s-name" placeholder="Your Full Name"/>
+              </div>
+              <div class="form-group">
+                <label>Job Title</label>
+                <input type="text" id="s-title" placeholder="Architecture & 3D Visualization"/>
+              </div>
+              <div class="form-group">
+                <label>Tagline</label>
+                <input type="text" id="s-tagline" placeholder="Transforming Visions Into Reality"/>
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="s-email" placeholder="your@email.com"/>
+              </div>
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="text" id="s-phone" placeholder="+92 300 0000000"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>About Text</label>
+              <textarea id="s-about" rows="5" placeholder="Tell visitors about yourself..."></textarea>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Admin Security</h3>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Change Password</label>
+                <input type="password" id="s-password" placeholder="New password (leave blank to keep current)"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>GitHub Token</h3>
+            <div class="form-group">
+              <label>Personal Access Token</label>
+              <input type="password" id="s-token" placeholder="ghp_... (leave blank to keep current)"/>
+              <small class="field-hint">Your token is stored locally and used to publish changes.</small>
+            </div>
+          </div>
+
+          <div id="settings-msg" class="success-msg" style="display:none;"></div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Save Settings & Publish →</button>
+          </div>
+        </form>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div class="modal-overlay" id="confirm-modal" style="display:none;">
+    <div class="modal-box">
+      <h3 id="modal-title">Confirm Delete</h3>
+      <p id="modal-msg">Are you sure you want to delete this project?</p>
+      <div class="modal-actions">
+        <button class="btn-outline" id="modal-cancel">Cancel</button>
+        <button class="btn-danger" id="modal-confirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
