@@ -852,7 +852,6 @@ function addNewSoftwareTag() {
   saveData(d);
   showToast(`✨ "${val}" circle mein add ho gaya!`);
 }
-}
 
 function openSocialModal(platform, el) {
   currentSocialPlatform = platform;
