@@ -18,32 +18,11 @@ const PAGE_SIZE     = 12;
    LOADER
    ============================================================ */
 function initLoader() {
-  const loader   = document.getElementById('loader');
-  const progress = document.getElementById('loaderProgress');
-  const percent  = document.getElementById('loaderPercent');
-  if (!loader) return;
-
-  // Maximum fail-safe: automatically dismiss after 1 second
-  const forceDismiss = setTimeout(() => {
+  const loader = document.getElementById('loader');
+  if (loader) {
     loader.classList.add('hidden');
-    setTimeout(() => { loader.style.display = 'none'; }, 400);
-  }, 1000);
-
-  let val = 0;
-  const timer = setInterval(() => {
-    val += Math.random() * 25 + 15;
-    if (val >= 100) {
-      val = 100;
-      clearInterval(timer);
-      clearTimeout(forceDismiss);
-      setTimeout(() => {
-        loader.classList.add('hidden');
-        setTimeout(() => { loader.style.display = 'none'; }, 400);
-      }, 200);
-    }
-    if (progress) progress.style.width = val + '%';
-    if (percent)  percent.textContent  = Math.floor(val) + '%';
-  }, 40);
+    loader.style.display = 'none';
+  }
 }
 
 /* ============================================================
@@ -121,7 +100,7 @@ function initParticles() {
     this.reset();
   }
 
-  for (let i = 0; i < 120; i++) { const p = new Particle(); particles.push(p); }
+  for (let i = 0; i < 40; i++) { const p = new Particle(); particles.push(p); }
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
@@ -190,8 +169,11 @@ function initNavbar() {
 function initAOS() {
   const obs = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('animated'); });
-  }, { threshold: 0.1 });
+  }, { threshold: 0.05 });
   document.querySelectorAll('[data-aos]').forEach(el => obs.observe(el));
+  setTimeout(() => {
+    document.querySelectorAll('[data-aos]').forEach(el => el.classList.add('animated'));
+  }, 500);
 }
 
 /* ============================================================
@@ -249,12 +231,12 @@ function animateNum(id, target) {
    ============================================================ */
 async function loadPortfolio() {
   try {
-    const res = await fetch(DATA_URL);
-    if (!res.ok) throw new Error('GitHub fetch failed');
+    const res = await fetch('portfolio.json?nc=' + Date.now());
+    if (!res.ok) throw new Error('Local fetch failed');
     portfolioData = await res.json();
   } catch {
     try {
-      const res = await fetch('portfolio.json?nc=' + Date.now());
+      const res = await fetch(DATA_URL);
       portfolioData = await res.json();
     } catch { showGalleryEmpty(); return; }
   }
