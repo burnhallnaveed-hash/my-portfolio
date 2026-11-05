@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css?v=3.5"/>
 </head>
 <body>
 
@@ -140,9 +140,12 @@
         <span class="tag t2">Revit</span>
         <span class="tag t3">D5 Render</span>
         <span class="tag t4">Animation</span>
+        <span class="tag tag-add-pill" id="orbitPillTag" style="top:-8%;left:32%;"><i class="fas fa-plus"></i> Add Software</span>
       </div>
-      <button type="button" class="btn-orbit-add" id="orbitAddBtn" title="Add / Edit Software Tags">
-        <i class="fas fa-plus"></i> Add Software
+    </div>
+    <div class="orbit-actions-bar" style="margin-top:1.5rem;text-align:center;position:relative;z-index:25;">
+      <button type="button" class="btn-orbit-add-pill" id="orbitAddBtn">
+        <i class="fas fa-plus-circle"></i> Add Software Tag
       </button>
     </div>
   </div>
@@ -515,6 +518,6 @@
   </div>
 </div>
 
-<script src="script.js"></script>
+<script src="script.js?v=3.5"></script>
 </body>
 </html>

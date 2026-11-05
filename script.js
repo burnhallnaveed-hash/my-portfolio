@@ -593,6 +593,14 @@ function initEditMode() {
       openEditAuthModal(() => openSoftwareModal());
     }
   });
+  document.getElementById('orbitPillTag')?.addEventListener('click', () => {
+    const isAuth = sessionStorage.getItem('cms_session_auth') === 'true';
+    if (isAuth) {
+      openSoftwareModal();
+    } else {
+      openEditAuthModal(() => openSoftwareModal());
+    }
+  });
   document.getElementById('softwareModalClose')?.addEventListener('click', closeSoftwareModal);
   document.getElementById('softwareModalDone')?.addEventListener('click', () => {
     closeSoftwareModal();
