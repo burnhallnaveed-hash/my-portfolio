@@ -670,7 +670,12 @@ function initEditMode() {
   loadSavedEdits();
 }
 
+let lastToggleTime = 0;
 function tryToggleEditMode() {
+  const now = Date.now();
+  if (now - lastToggleTime < 300) return;
+  lastToggleTime = now;
+
   if (editMode) {
     toggleEditMode();
     return;
@@ -682,8 +687,6 @@ function tryToggleEditMode() {
     openEditAuthModal();
   }
 }
-
-let authSuccessCallback = null;
 
 function openEditAuthModal(callback = null) {
   authSuccessCallback = callback;
@@ -724,7 +727,11 @@ function closeEditAuthModal() {
   authSuccessCallback = null;
 }
 
+let lastAuthTime = 0;
 function handleEditAuth() {
+  const now = Date.now();
+  if (now - lastAuthTime < 300) return;
+  lastAuthTime = now;
   const passInput = document.getElementById('editAuthPass');
   const entered = passInput?.value || '';
   const savedPass = localStorage.getItem('cms_admin_password') || 'admin123';
