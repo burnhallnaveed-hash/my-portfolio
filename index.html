@@ -4,246 +4,413 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Professional Architecture & 3D Visualization Portfolio — Photorealistic Renderings, Animations, Interior Design"/>
-  <meta name="keywords" content="architecture, 3D visualization, rendering, interior design, animation, portfolio"/>
   <meta property="og:title" content="Architecture & 3D Visualization Portfolio"/>
-  <meta property="og:description" content="Professional photorealistic architectural renderings and animations"/>
   <meta property="og:type" content="website"/>
   <title>Architecture & 3D Visualization</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar" id="navbar">
-    <div class="nav-inner">
-      <a href="#home" class="nav-logo">
-        <span class="logo-line"></span>
-        <span class="logo-text">STUDIO</span>
-        <span class="logo-line"></span>
-      </a>
-      <ul class="nav-links" id="nav-links">
-        <li><a href="#home" class="nav-link">Home</a></li>
-        <li><a href="#work" class="nav-link">Work</a></li>
-        <li><a href="#about" class="nav-link">About</a></li>
-        <li><a href="#contact" class="nav-link">Contact</a></li>
-      </ul>
-      <div class="nav-right">
-        <a href="admin/" class="btn-admin" title="Admin Panel">⚙</a>
-        <button class="hamburger" id="hamburger" aria-label="Menu">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
+<!-- LOADER -->
+<div class="loader" id="loader">
+  <div class="loader-inner">
+    <div class="loader-logo">
+      <span class="loader-letter" style="animation-delay:.05s">3</span>
+      <span class="loader-letter" style="animation-delay:.1s">D</span>
+      <span class="loader-letter" style="animation-delay:.15s">&nbsp;</span>
+      <span class="loader-letter" style="animation-delay:.2s">S</span>
+      <span class="loader-letter" style="animation-delay:.25s">T</span>
+      <span class="loader-letter" style="animation-delay:.3s">U</span>
+      <span class="loader-letter" style="animation-delay:.35s">D</span>
+      <span class="loader-letter" style="animation-delay:.4s">I</span>
+      <span class="loader-letter" style="animation-delay:.45s">O</span>
     </div>
-  </nav>
-
-  <!-- HERO -->
-  <section class="hero" id="home">
-    <div class="hero-bg">
-      <div class="hero-overlay"></div>
-      <div class="hero-grid-pattern"></div>
-    </div>
-    <div class="hero-content">
-      <div class="hero-eyebrow" id="hero-eyebrow">Architecture & 3D Visualization</div>
-      <h1 class="hero-title" id="hero-title">
-        <span class="hero-line">Transforming</span>
-        <span class="hero-line hero-italic" id="hero-tagline">Visions</span>
-        <span class="hero-line">Into Reality</span>
-      </h1>
-      <p class="hero-desc" id="hero-desc">Photorealistic architectural renderings, 3D animations,<br/>interior design & product visualization</p>
-      <div class="hero-actions">
-        <a href="#work" class="btn-gold" id="hero-work-btn">View Portfolio</a>
-        <a href="#contact" class="btn-ghost" id="hero-contact-btn">Start a Project</a>
-      </div>
-      <div class="hero-scroll">
-        <div class="scroll-line"></div>
-        <span>Scroll</span>
-      </div>
-    </div>
-    <div class="hero-counter" id="hero-counter">
-      <div class="hc-item"><span class="hc-num" id="stat-projects">0</span><span class="hc-label">Projects</span></div>
-      <div class="hc-sep"></div>
-      <div class="hc-item"><span class="hc-num" id="stat-clients">0</span><span class="hc-label">Clients</span></div>
-      <div class="hc-sep"></div>
-      <div class="hc-item"><span class="hc-num" id="stat-years">0</span><span class="hc-label">Years Exp.</span></div>
-    </div>
-  </section>
-
-  <!-- PORTFOLIO SECTION -->
-  <section class="work-section" id="work">
-    <div class="container">
-      <div class="section-head">
-        <div class="sh-left">
-          <span class="sh-tag">Portfolio</span>
-          <h2 class="sh-title">Selected Work</h2>
-        </div>
-        <p class="sh-desc">Every project is a unique story — crafted with precision and passion</p>
-      </div>
-
-      <!-- FILTER TABS -->
-      <div class="filter-bar" id="filter-bar">
-        <button class="filter-btn active" data-cat="all" id="filter-all">All Work</button>
-        <button class="filter-btn" data-cat="architecture" id="filter-architecture">Architecture</button>
-        <button class="filter-btn" data-cat="interior" id="filter-interior">Interiors</button>
-        <button class="filter-btn" data-cat="product" id="filter-product">Product Design</button>
-        <button class="filter-btn" data-cat="graphics" id="filter-graphics">Graphics</button>
-        <button class="filter-btn" data-cat="animation" id="filter-animation">Animations</button>
-      </div>
-
-      <!-- GALLERY GRID -->
-      <div class="gallery-grid" id="gallery-grid">
-        <div class="gallery-loading" id="gallery-loading">
-          <div class="loading-spinner"></div>
-          <p>Loading portfolio...</p>
-        </div>
-      </div>
-
-      <div class="gallery-empty" id="gallery-empty" style="display:none;">
-        <div class="empty-icon">🎨</div>
-        <h3>No projects yet</h3>
-        <p>Go to the <a href="admin/">Admin Panel</a> to add your first project.</p>
-      </div>
-
-      <div class="load-more-wrap" id="load-more-wrap" style="display:none;">
-        <button class="btn-gold" id="load-more-btn">Load More Work</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ABOUT SECTION -->
-  <section class="about-section" id="about">
-    <div class="container">
-      <div class="about-grid">
-        <div class="about-left">
-          <span class="sh-tag">About</span>
-          <h2 class="sh-title about-title" id="about-title">The Studio</h2>
-          <p class="about-text" id="about-text">Loading...</p>
-          <div class="about-services">
-            <div class="service-item">
-              <span class="si-icon">🏛️</span>
-              <div><strong>Architecture Rendering</strong><small>Exterior & Interior Visualizations</small></div>
-            </div>
-            <div class="service-item">
-              <span class="si-icon">🎬</span>
-              <div><strong>3D Animation</strong><small>Walkthrough & Flythrough Videos</small></div>
-            </div>
-            <div class="service-item">
-              <span class="si-icon">📦</span>
-              <div><strong>Product Visualization</strong><small>360° Product Renders</small></div>
-            </div>
-            <div class="service-item">
-              <span class="si-icon">✏️</span>
-              <div><strong>Graphics & Branding</strong><small>Visual Identity & Design</small></div>
-            </div>
-          </div>
-          <a href="#contact" class="btn-gold">Work With Me</a>
-        </div>
-        <div class="about-right">
-          <div class="about-visual">
-            <div class="av-box av-box-1"></div>
-            <div class="av-box av-box-2"></div>
-            <div class="av-initials" id="av-initials">YN</div>
-            <div class="av-badge">
-              <span>✦</span>
-              <strong id="av-title">Architecture & 3D</strong>
-              <small>Visualization Studio</small>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONTACT SECTION -->
-  <section class="contact-section" id="contact">
-    <div class="container">
-      <div class="contact-inner">
-        <div class="contact-left">
-          <span class="sh-tag">Contact</span>
-          <h2 class="sh-title">Start a Project</h2>
-          <p>Ready to bring your vision to life? Let's talk about your project and create something extraordinary together.</p>
-          <div class="contact-details">
-            <a href="#" class="cd-item" id="cd-email-link">
-              <span class="cd-icon">✉</span>
-              <span id="cd-email">your.email@gmail.com</span>
-            </a>
-            <a href="#" class="cd-item" id="cd-phone-link">
-              <span class="cd-icon">📱</span>
-              <span id="cd-phone">+92 300 0000000</span>
-            </a>
-          </div>
-        </div>
-        <form class="contact-form" id="contact-form" novalidate>
-          <div class="cf-row">
-            <div class="cf-group">
-              <label for="cf-name">Name</label>
-              <input type="text" id="cf-name" placeholder="Your Name" required/>
-            </div>
-            <div class="cf-group">
-              <label for="cf-email">Email</label>
-              <input type="email" id="cf-email" placeholder="your@email.com" required/>
-            </div>
-          </div>
-          <div class="cf-group">
-            <label for="cf-service">Service</label>
-            <select id="cf-service">
-              <option value="">Select a Service</option>
-              <option value="architecture">Architecture Rendering</option>
-              <option value="interior">Interior Visualization</option>
-              <option value="animation">3D Animation</option>
-              <option value="product">Product Design</option>
-              <option value="graphics">Graphics & Branding</option>
-            </select>
-          </div>
-          <div class="cf-group">
-            <label for="cf-message">Message</label>
-            <textarea id="cf-message" rows="4" placeholder="Tell me about your project..."></textarea>
-          </div>
-          <button type="submit" class="btn-gold btn-full" id="cf-submit">
-            Send Message <span>→</span>
-          </button>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-inner">
-        <div class="footer-brand">
-          <span class="logo-text" id="footer-name">Your Name</span>
-          <small id="footer-title">Architecture & 3D Visualization</small>
-        </div>
-        <div class="footer-links">
-          <a href="#work">Portfolio</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
-          <a href="admin/">Admin</a>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>© <span id="footer-year"></span> <span id="footer-name-2">Your Name</span> — All Rights Reserved</p>
-        <p>Hosted on <a href="https://pages.github.com" target="_blank">GitHub Pages</a></p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- LIGHTBOX -->
-  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
-    <button class="lb-close" id="lb-close" aria-label="Close">✕</button>
-    <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous">‹</button>
-    <button class="lb-nav lb-next" id="lb-next" aria-label="Next">›</button>
-    <div class="lb-content" id="lb-content"></div>
-    <div class="lb-info">
-      <h3 id="lb-title"></h3>
-      <p id="lb-desc"></p>
-    </div>
-    <div class="lb-counter" id="lb-counter"></div>
+    <div class="loader-bar"><div class="loader-progress" id="loaderProgress"></div></div>
+    <span class="loader-percent" id="loaderPercent">0%</span>
   </div>
+</div>
 
-  <script src="script.js"></script>
+<!-- CUSTOM CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-follower" id="cursorFollower"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-logo">
+    <span class="logo-bracket">[</span>
+    <span class="logo-text" id="nav-name">STUDIO</span>
+    <span class="logo-bracket">]</span>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="#home"     class="nav-link active">Home</a>
+    <a href="#about"    class="nav-link">About</a>
+    <a href="#skills"   class="nav-link">Skills</a>
+    <a href="#work"     class="nav-link">Portfolio</a>
+    <a href="#gallery"  class="nav-link">Gallery</a>
+    <a href="#contact"  class="nav-link">Contact</a>
+  </div>
+  <div class="nav-actions">
+    <a href="#contact" class="btn-hire">Hire Me</a>
+    <a href="admin/" class="btn-admin-nav" title="Admin Panel"><i class="fas fa-cog"></i></a>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg">
+    <canvas id="particleCanvas"></canvas>
+    <div class="hero-gradient"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      <span>Available for Freelance</span>
+    </div>
+    <h1 class="hero-title">
+      <span class="line">Architecture</span>
+      <span class="line gradient-text" id="hero-tagline">3D Visualization</span>
+      <span class="line">& Design</span>
+    </h1>
+    <p class="hero-desc" id="hero-desc">Transforming ideas into stunning 3D realities — from architectural masterpieces to mesmerizing animations and product designs.</p>
+    <div class="hero-btns">
+      <a href="#work" class="btn-primary"><span>View My Work</span><i class="fas fa-arrow-right"></i></a>
+      <a href="#contact" class="btn-secondary"><span>Get In Touch</span></a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-num" id="stat-projects">0</span><span>+</span>
+        <span class="stat-label">Projects</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num" id="stat-clients">0</span><span>+</span>
+        <span class="stat-label">Clients</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num" id="stat-years">0</span><span>+</span>
+        <span class="stat-label">Years Exp.</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-3d-card">
+      <div class="card-inner">
+        <div class="orbit">
+          <div class="orbit-ring ring1"><div class="planet p1"><i class="fas fa-cube"></i></div></div>
+          <div class="orbit-ring ring2"><div class="planet p2"><i class="fas fa-drafting-compass"></i></div></div>
+          <div class="orbit-ring ring3"><div class="planet p3"><i class="fas fa-film"></i></div></div>
+        </div>
+        <div class="center-icon"><i class="fas fa-hexagon"></i><span>3D</span></div>
+      </div>
+      <div class="floating-tags">
+        <span class="tag t1">Blender</span>
+        <span class="tag t2">Revit</span>
+        <span class="tag t3">D5 Render</span>
+        <span class="tag t4">Animation</span>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+    <span>Scroll Down</span>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about section" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-image-wrap" data-aos="fade-right">
+        <div class="about-img-bg"></div>
+        <div class="about-img-container">
+          <div class="about-avatar" id="about-avatar">
+            <div class="avatar-placeholder">
+              <i class="fas fa-user-tie"></i>
+              <span id="av-initials">YN</span>
+            </div>
+          </div>
+          <div class="about-badge-card">
+            <i class="fas fa-award"></i>
+            <div>
+              <strong id="av-title">Architecture & 3D</strong>
+              <span>Visualization Studio</span>
+            </div>
+          </div>
+          <div class="about-exp-card">
+            <span class="exp-num">3+</span>
+            <span class="exp-label">Years of Experience</span>
+          </div>
+        </div>
+      </div>
+      <div class="about-text" data-aos="fade-left">
+        <div class="section-tag">About Me</div>
+        <h2 class="section-title">
+          <span>Passionate About </span>
+          <span class="gradient-text" id="about-title">Design & Innovation</span>
+        </h2>
+        <p class="about-desc" id="about-text">Loading...</p>
+        <div class="about-highlights">
+          <div class="highlight"><i class="fas fa-check-circle"></i><span>Architectural Visualization Expert</span></div>
+          <div class="highlight"><i class="fas fa-check-circle"></i><span>Blender 3D Animation & Modeling</span></div>
+          <div class="highlight"><i class="fas fa-check-circle"></i><span>Photorealistic D5 Renders</span></div>
+          <div class="highlight"><i class="fas fa-check-circle"></i><span>Product Design & Animation</span></div>
+        </div>
+        <div class="about-actions">
+          <a href="#contact" class="btn-primary"><i class="fas fa-envelope"></i><span>Contact Me</span></a>
+          <div class="social-row">
+            <a href="#" class="social-icon"><i class="fab fa-behance"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section class="skills section" id="skills">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">My Expertise</div>
+      <h2 class="section-title">Tools & <span class="gradient-text">Skills</span></h2>
+      <p class="section-sub">Cutting-edge tools I use to bring your vision to life</p>
+    </div>
+    <div class="skills-grid" data-aos="fade-up">
+      <div class="skill-card">
+        <div class="skill-icon" style="--clr:#f7931e"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Blender_logo_no_text.svg" alt="Blender" onerror="this.outerHTML='<i class=\'fas fa-cube\'></i>'"/></div>
+        <h3>Blender 3D</h3>
+        <p>Modeling, Rigging, Animation, VFX, Rendering</p>
+        <div class="skill-bar"><div class="skill-fill" data-width="90"></div></div>
+        <span class="skill-percent">90%</span>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon" style="--clr:#0696d7"><i class="fas fa-drafting-compass"></i></div>
+        <h3>Autodesk Revit</h3>
+        <p>BIM, Architectural Design, Documentation</p>
+        <div class="skill-bar"><div class="skill-fill" data-width="85"></div></div>
+        <span class="skill-percent">85%</span>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon" style="--clr:#50fa7b"><i class="fas fa-photo-film"></i></div>
+        <h3>D5 Render</h3>
+        <p>Real-time Rendering, Arch-viz, Photorealism</p>
+        <div class="skill-bar"><div class="skill-fill" data-width="88"></div></div>
+        <span class="skill-percent">88%</span>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon" style="--clr:#ff79c6"><i class="fas fa-film"></i></div>
+        <h3>3D Animation</h3>
+        <p>Cinematic Animations, Motion Graphics, VFX</p>
+        <div class="skill-bar"><div class="skill-fill" data-width="82"></div></div>
+        <span class="skill-percent">82%</span>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon" style="--clr:#bd93f9"><i class="fas fa-building"></i></div>
+        <h3>Architecture</h3>
+        <p>Residential, Commercial, Urban Planning</p>
+        <div class="skill-bar"><div class="skill-fill" data-width="87"></div></div>
+        <span class="skill-percent">87%</span>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon" style="--clr:#ff5555"><i class="fas fa-box-open"></i></div>
+        <h3>Product Design</h3>
+        <p>3D Modeling, Prototyping, Product Animation</p>
+        <div class="skill-bar"><div class="skill-fill" data-width="80"></div></div>
+        <span class="skill-percent">80%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO / WORK SECTION -->
+<section class="projects section" id="work">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">My Work</div>
+      <h2 class="section-title">Featured <span class="gradient-text">Projects</span></h2>
+      <p class="section-sub">A showcase of my best work across different domains</p>
+    </div>
+    <!-- FILTER TABS — built by JS from portfolio.json -->
+    <div class="filter-tabs" id="filter-bar" data-aos="fade-up">
+      <button class="filter-btn active" data-cat="all">All</button>
+      <button class="filter-btn" data-cat="architecture">Architecture</button>
+      <button class="filter-btn" data-cat="interior">Interiors</button>
+      <button class="filter-btn" data-cat="animation">Animation</button>
+      <button class="filter-btn" data-cat="product">Product</button>
+      <button class="filter-btn" data-cat="graphics">Graphics</button>
+    </div>
+
+    <!-- GALLERY GRID — dynamic from portfolio.json -->
+    <div class="projects-grid gallery-masonry" id="gallery-grid" data-aos="fade-up">
+      <div class="gallery-loading" id="gallery-loading">
+        <div class="loading-spinner"></div>
+        <p>Loading portfolio...</p>
+      </div>
+    </div>
+
+    <div class="gallery-empty-state" id="gallery-empty" style="display:none;">
+      <i class="fas fa-images"></i>
+      <h3>No projects yet</h3>
+      <p>Go to the <a href="admin/">Admin Panel</a> to add your first project.</p>
+    </div>
+
+    <div class="projects-cta" data-aos="fade-up" id="load-more-wrap" style="display:none;">
+      <button class="btn-primary" id="load-more-btn"><span>Load More Work</span><i class="fas fa-arrow-down"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY SECTION (All renders masonry) -->
+<section class="gallery-section section" id="gallery">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">My Gallery</div>
+      <h2 class="section-title">Work <span class="gradient-text">Showcase</span></h2>
+      <p class="section-sub">All renders, animations and designs in one place</p>
+    </div>
+    <div class="gallery-grid-masonry" id="gallery-all-grid" data-aos="fade-up">
+      <!-- Populated from portfolio.json -->
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services section" id="services">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">What I Offer</div>
+      <h2 class="section-title">My <span class="gradient-text">Services</span></h2>
+    </div>
+    <div class="services-grid">
+      <div class="service-card" data-aos="flip-left">
+        <div class="service-num">01</div><div class="service-icon"><i class="fas fa-building"></i></div>
+        <h3>Architectural Design</h3>
+        <p>Complete architectural solutions from concept to documentation using Revit BIM technology.</p>
+        <ul><li>Floor Plans & Elevations</li><li>3D Building Models</li><li>BIM Documentation</li></ul>
+      </div>
+      <div class="service-card" data-aos="flip-left" style="animation-delay:.15s">
+        <div class="service-num">02</div><div class="service-icon"><i class="fas fa-eye"></i></div>
+        <h3>3D Visualization</h3>
+        <p>Photorealistic renders and visualizations that bring your designs to life before construction.</p>
+        <ul><li>Exterior Renders</li><li>Interior Visualization</li><li>D5 Real-time Renders</li></ul>
+      </div>
+      <div class="service-card" data-aos="flip-left" style="animation-delay:.3s">
+        <div class="service-num">03</div><div class="service-icon"><i class="fas fa-film"></i></div>
+        <h3>3D Animation</h3>
+        <p>Cinematic animations and architectural fly-throughs created with professional Blender workflows.</p>
+        <ul><li>Architectural Fly-Throughs</li><li>Product Animations</li><li>Motion Graphics</li></ul>
+      </div>
+      <div class="service-card" data-aos="flip-left" style="animation-delay:.45s">
+        <div class="service-num">04</div><div class="service-icon"><i class="fas fa-box-open"></i></div>
+        <h3>Product Design</h3>
+        <p>Premium product visualization and animation for commercial branding and marketing campaigns.</p>
+        <ul><li>Product Modeling</li><li>360° Animations</li><li>Commercial Renders</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact section" id="contact">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">Get In Touch</div>
+      <h2 class="section-title">Let's Work <span class="gradient-text">Together</span></h2>
+      <p class="section-sub">Have a project in mind? I'd love to hear about it!</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info" data-aos="fade-right">
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+          <div><strong>Email</strong><span id="cd-email">your.email@gmail.com</span></div>
+        </div>
+        <a href="#" id="cd-phone-link" class="contact-item" style="text-decoration:none;color:inherit;">
+          <div class="contact-icon"><i class="fas fa-phone"></i></div>
+          <div><strong>WhatsApp</strong><span id="cd-phone">+92 300 0000000</span></div>
+        </a>
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div><strong>Location</strong><span>Pakistan</span></div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-clock"></i></div>
+          <div><strong>Availability</strong><span>Mon–Sat, 9am – 7pm PKT</span></div>
+        </div>
+        <div class="contact-socials">
+          <a href="#" class="csocial"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" class="csocial"><i class="fab fa-behance"></i></a>
+          <a href="#" class="csocial"><i class="fab fa-linkedin"></i></a>
+          <a href="#" class="csocial"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="csocial"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+      <form class="contact-form" id="contact-form" data-aos="fade-left">
+        <div class="form-row">
+          <div class="form-group"><label>Your Name</label><input type="text" id="cf-name" placeholder="Your Name" required/></div>
+          <div class="form-group"><label>Email</label><input type="email" id="cf-email" placeholder="your@email.com" required/></div>
+        </div>
+        <div class="form-group">
+          <label>Service</label>
+          <select id="cf-service">
+            <option value="">Select service...</option>
+            <option>Architectural Design</option>
+            <option>3D Rendering / D5 Render</option>
+            <option>Blender Animation</option>
+            <option>Product Design & Animation</option>
+            <option>Revit BIM</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Message</label><textarea id="cf-message" rows="5" placeholder="Tell me about your project..." required></textarea></div>
+        <button type="submit" class="btn-primary full-width"><span>Send Message</span><i class="fas fa-paper-plane"></i></button>
+        <div class="form-success" id="formSuccess"><i class="fas fa-check-circle"></i> Message sent successfully!</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <span class="logo-bracket">[</span>
+      <span class="logo-text" id="footer-name">YOUR NAME</span>
+      <span class="logo-bracket">]</span>
+    </div>
+    <p>© <span id="footer-year"></span> — All Rights Reserved. Hosted on <a href="https://pages.github.com" target="_blank" style="color:var(--accent2)">GitHub Pages</a></p>
+    <div class="footer-links">
+      <a href="#home">Home</a>
+      <a href="#work">Portfolio</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#contact">Contact</a>
+      <a href="admin/">Admin</a>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop"><i class="fas fa-arrow-up"></i></button>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lb-close"><i class="fas fa-xmark"></i></button>
+  <button class="lb-btn lb-prev" id="lb-prev"><i class="fas fa-chevron-left"></i></button>
+  <button class="lb-btn lb-next" id="lb-next"><i class="fas fa-chevron-right"></i></button>
+  <div class="lb-media-wrap" id="lb-content"></div>
+  <div class="lb-counter" id="lb-counter"></div>
+  <div class="lb-info">
+    <h3 id="lb-title"></h3>
+    <p id="lb-desc"></p>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>

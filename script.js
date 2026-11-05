@@ -1,349 +1,219 @@
-/* =========================================
-   PORTFOLIO MAIN SCRIPT
-   Reads from portfolio.json — dynamic gallery
-   ========================================= */
+/* ============================================================
+   PORTFOLIO SCRIPT — Dynamic JSON + All Visual Effects
+   Loader · Particles · Cursor · AOS · Lightbox · Gallery
+   ============================================================ */
 
 const REPO_OWNER = 'burnhallnaveed-hash';
 const REPO_NAME  = 'my-portfolio';
 const BRANCH     = 'master';
 const DATA_URL   = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/portfolio.json?nocache=${Date.now()}`;
 
-let portfolioData = null;
-let filteredProjects = [];
-let currentLBIndex = 0;
-let visibleCount = 12;
-const PAGE_SIZE = 12;
+let portfolioData   = null;
+let filteredProjects= [];
+let currentLBIndex  = 0;
+let visibleCount    = 12;
+const PAGE_SIZE     = 12;
 
-// ---- INIT ----
-document.addEventListener('DOMContentLoaded', async () => {
-  initNavbar();
-  initHamburger();
-  initScrollReveal();
-  document.getElementById('footer-year').textContent = new Date().getFullYear();
-  await loadPortfolio();
-  initLightbox();
-  initContactForm();
-  initCounters();
-});
+/* ============================================================
+   LOADER
+   ============================================================ */
+function initLoader() {
+  const loader   = document.getElementById('loader');
+  const progress = document.getElementById('loaderProgress');
+  const percent  = document.getElementById('loaderPercent');
+  if (!loader) return;
 
-// ---- LOAD PORTFOLIO DATA ----
-async function loadPortfolio() {
-  try {
-    const res = await fetch(DATA_URL);
-    if (!res.ok) throw new Error('Failed to fetch portfolio.json');
-    portfolioData = await res.json();
-    applySettings(portfolioData.settings);
-    buildFilterBar(portfolioData.categories);
-    filteredProjects = portfolioData.projects || [];
-    renderGallery();
-  } catch (err) {
-    console.warn('Could not load portfolio.json from GitHub, using local fallback:', err);
-    // Fallback: try local
-    try {
-      const res = await fetch('portfolio.json?nocache=' + Date.now());
-      portfolioData = await res.json();
-      applySettings(portfolioData.settings);
-      buildFilterBar(portfolioData.categories);
-      filteredProjects = portfolioData.projects || [];
-      renderGallery();
-    } catch (e) {
-      showGalleryEmpty();
+  let val = 0;
+  const timer = setInterval(() => {
+    val += Math.random() * 15 + 3;
+    if (val >= 100) { val = 100; clearInterval(timer); }
+    if (progress) progress.style.width = val + '%';
+    if (percent)  percent.textContent  = Math.floor(val) + '%';
+    if (val === 100) {
+      setTimeout(() => { loader.classList.add('hidden'); }, 400);
     }
-  }
+  }, 60);
 }
 
-// ---- APPLY SETTINGS ----
-function applySettings(s) {
-  if (!s) return;
-  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
-  const setHref = (id, val) => { const el = document.getElementById(id); if (el && val) el.href = val; };
+/* ============================================================
+   CUSTOM CURSOR
+   ============================================================ */
+function initCursor() {
+  const cursor   = document.getElementById('cursor');
+  const follower = document.getElementById('cursorFollower');
+  if (!cursor || !follower) return;
 
-  set('hero-eyebrow', s.title || '');
-  set('hero-tagline', s.tagline ? s.tagline.split(' ')[0] : 'Visions');
+  let mx = 0, my = 0, fx = 0, fy = 0;
 
-  // Update hero title
-  const heroTitle = document.getElementById('hero-title');
-  if (heroTitle && s.tagline) {
-    const words = s.tagline.split(' ');
-    heroTitle.innerHTML = `
-      <span class="hero-line">${words[0] || 'Transforming'}</span>
-      <span class="hero-line hero-italic">${words[1] || 'Visions'}</span>
-      <span class="hero-line">${words.slice(2).join(' ') || 'Into Reality'}</span>
-    `;
-  }
-
-  set('about-title', (s.name || 'The Studio'));
-  set('about-text', s.about || '');
-  set('av-title', s.title || '');
-  set('av-initials', getInitials(s.name || 'YN'));
-  set('footer-name', s.name || 'Your Name');
-  set('footer-name-2', s.name || 'Your Name');
-  set('footer-title', s.title || '');
-  set('cd-email', s.email || '');
-  set('cd-phone', s.phone || '');
-  if (s.email) setHref('cd-email-link', 'mailto:' + s.email);
-  if (s.phone) setHref('cd-phone-link', 'tel:' + s.phone.replace(/\s/g,''));
-}
-
-function getInitials(name) {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
-}
-
-// ---- FILTER BAR ----
-function buildFilterBar(categories) {
-  if (!categories || !categories.length) return;
-  const bar = document.getElementById('filter-bar');
-  bar.innerHTML = '';
-  categories.forEach((cat, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn' + (i === 0 ? ' active' : '');
-    btn.dataset.cat = cat.id;
-    btn.id = 'filter-' + cat.id;
-    btn.textContent = cat.label;
-    btn.addEventListener('click', () => filterGallery(cat.id, btn));
-    bar.appendChild(btn);
-  });
-}
-
-function filterGallery(catId, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  if (catId === 'all') {
-    filteredProjects = portfolioData.projects || [];
-  } else {
-    filteredProjects = (portfolioData.projects || []).filter(p => p.category === catId);
-  }
-  visibleCount = PAGE_SIZE;
-  renderGallery();
-}
-
-// ---- RENDER GALLERY ----
-function renderGallery() {
-  const grid = document.getElementById('gallery-grid');
-  const loading = document.getElementById('gallery-loading');
-  const empty = document.getElementById('gallery-empty');
-  const loadMoreWrap = document.getElementById('load-more-wrap');
-
-  if (loading) loading.style.display = 'none';
-
-  if (!filteredProjects || filteredProjects.length === 0) {
-    grid.innerHTML = '';
-    if (empty) empty.style.display = 'block';
-    if (loadMoreWrap) loadMoreWrap.style.display = 'none';
-    return;
-  }
-
-  if (empty) empty.style.display = 'none';
-  grid.innerHTML = '';
-
-  const toShow = filteredProjects.slice(0, visibleCount);
-
-  toShow.forEach((project, idx) => {
-    const item = createGalleryItem(project, idx);
-    grid.appendChild(item);
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left   = mx + 'px';
+    cursor.style.top    = my + 'px';
   });
 
-  // Animate items in
-  setTimeout(() => {
-    document.querySelectorAll('.gallery-item').forEach((el, i) => {
-      setTimeout(() => el.classList.add('visible'), i * 60);
+  (function animFollower() {
+    fx += (mx - fx) * 0.12;
+    fy += (my - fy) * 0.12;
+    follower.style.left = fx + 'px';
+    follower.style.top  = fy + 'px';
+    requestAnimationFrame(animFollower);
+  })();
+
+  document.querySelectorAll('a, button, .filter-btn, .gallery-masonry-item, .gmi-item')
+    .forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.width   = '20px';
+        cursor.style.height  = '20px';
+        cursor.style.background = 'var(--gold)';
+        follower.style.width  = '56px';
+        follower.style.height = '56px';
+        follower.style.borderColor = 'rgba(245,158,11,.4)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.width   = '10px';
+        cursor.style.height  = '10px';
+        cursor.style.background = 'var(--accent2)';
+        follower.style.width  = '36px';
+        follower.style.height = '36px';
+        follower.style.borderColor = 'rgba(168,85,247,.5)';
+      });
     });
-  }, 50);
+}
 
-  // Load more button
-  if (filteredProjects.length > visibleCount) {
-    if (loadMoreWrap) loadMoreWrap.style.display = 'block';
-  } else {
-    if (loadMoreWrap) loadMoreWrap.style.display = 'none';
+/* ============================================================
+   PARTICLE CANVAS
+   ============================================================ */
+function initParticles() {
+  const canvas = document.getElementById('particleCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
   }
+  resize();
+  window.addEventListener('resize', resize);
 
-  const loadMoreBtn = document.getElementById('load-more-btn');
-  if (loadMoreBtn) {
-    loadMoreBtn.onclick = () => {
-      visibleCount += PAGE_SIZE;
-      renderGallery();
+  function Particle() {
+    this.reset = function() {
+      this.x  = Math.random() * W;
+      this.y  = Math.random() * H;
+      this.r  = Math.random() * 1.5 + 0.3;
+      this.vx = (Math.random() - 0.5) * 0.4;
+      this.vy = (Math.random() - 0.5) * 0.4;
+      this.alpha = Math.random() * 0.5 + 0.1;
+      const colors = ['168,85,247', '124,58,237', '6,182,212', '245,158,11', '16,185,129'];
+      this.color = colors[Math.floor(Math.random() * colors.length)];
     };
-  }
-}
-
-function createGalleryItem(project, idx) {
-  const item = document.createElement('div');
-  item.className = 'gallery-item';
-  item.dataset.idx = idx;
-
-  const catLabel = getCategoryLabel(project.category);
-  const isVideo = project.type === 'youtube' || project.type === 'vimeo' || project.type === 'video';
-  const typeIcon = isVideo ? '▶' : '⊕';
-
-  if (isVideo) {
-    item.innerHTML = `
-      <div class="video-thumb">
-        ${project.thumbnail ? `<img src="${project.thumbnail}" alt="${project.title}" loading="lazy"/>` : ''}
-        <div class="play-btn">▶</div>
-      </div>
-      <div class="gallery-item-overlay">
-        <div class="gi-category">${catLabel}</div>
-        <div class="gi-title">${project.title}</div>
-      </div>
-      <div class="gi-type-badge">${typeIcon}</div>
-    `;
-  } else {
-    item.innerHTML = `
-      <img src="${project.thumbnail || project.src}" alt="${project.title}" loading="lazy"/>
-      <div class="gallery-item-overlay">
-        <div class="gi-category">${catLabel}</div>
-        <div class="gi-title">${project.title}</div>
-      </div>
-      <div class="gi-type-badge">${typeIcon}</div>
-    `;
+    this.reset();
   }
 
-  item.addEventListener('click', () => openLightbox(idx));
-  return item;
-}
+  for (let i = 0; i < 120; i++) { const p = new Particle(); particles.push(p); }
 
-function getCategoryLabel(catId) {
-  if (!portfolioData || !portfolioData.categories) return catId;
-  const cat = portfolioData.categories.find(c => c.id === catId);
-  return cat ? cat.label : catId;
-}
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W || p.y < 0 || p.y > H) p.reset();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${p.color},${p.alpha})`;
+      ctx.fill();
+    });
 
-function showGalleryEmpty() {
-  const loading = document.getElementById('gallery-loading');
-  const empty = document.getElementById('gallery-empty');
-  if (loading) loading.style.display = 'none';
-  if (empty) empty.style.display = 'block';
-}
-
-// ---- LIGHTBOX ----
-function initLightbox() {
-  const lb = document.getElementById('lightbox');
-  document.getElementById('lb-close').addEventListener('click', closeLightbox);
-  document.getElementById('lb-prev').addEventListener('click', () => navigateLB(-1));
-  document.getElementById('lb-next').addEventListener('click', () => navigateLB(1));
-  lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
-  document.addEventListener('keydown', e => {
-    if (!lb.classList.contains('open')) return;
-    if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowLeft') navigateLB(-1);
-    if (e.key === 'ArrowRight') navigateLB(1);
-  });
-}
-
-function openLightbox(idx) {
-  currentLBIndex = idx;
-  renderLBContent();
-  const lb = document.getElementById('lightbox');
-  lb.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  setTimeout(() => lb.classList.add('visible'), 10);
-}
-
-function closeLightbox() {
-  const lb = document.getElementById('lightbox');
-  lb.classList.remove('visible');
-  setTimeout(() => {
-    lb.classList.remove('open');
-    document.body.style.overflow = '';
-    document.getElementById('lb-content').innerHTML = '';
-  }, 300);
-}
-
-function navigateLB(dir) {
-  currentLBIndex = (currentLBIndex + dir + filteredProjects.length) % filteredProjects.length;
-  renderLBContent();
-}
-
-function renderLBContent() {
-  const project = filteredProjects[currentLBIndex];
-  if (!project) return;
-
-  const content = document.getElementById('lb-content');
-  document.getElementById('lb-title').textContent = project.title;
-  document.getElementById('lb-desc').textContent = project.description || '';
-  document.getElementById('lb-counter').textContent = `${currentLBIndex + 1} / ${filteredProjects.length}`;
-
-  content.innerHTML = '';
-
-  if (project.type === 'youtube' || project.type === 'vimeo') {
-    const iframe = document.createElement('iframe');
-    iframe.src = project.src + (project.src.includes('?') ? '&' : '?') + 'autoplay=1';
-    iframe.allow = 'autoplay; fullscreen; picture-in-picture';
-    iframe.allowFullscreen = true;
-    iframe.style.border = 'none';
-    content.appendChild(iframe);
-  } else if (project.type === 'video') {
-    const video = document.createElement('video');
-    video.src = project.src;
-    video.controls = true;
-    video.autoplay = true;
-    video.style.maxWidth = '90vw';
-    video.style.maxHeight = '80vh';
-    content.appendChild(video);
-  } else {
-    const img = document.createElement('img');
-    img.src = project.src;
-    img.alt = project.title;
-    content.appendChild(img);
+    // Draw connecting lines
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 100) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(124,58,237,${0.08 * (1 - dist/100)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
   }
-
-  // Update nav visibility
-  document.getElementById('lb-prev').style.display = filteredProjects.length > 1 ? 'flex' : 'none';
-  document.getElementById('lb-next').style.display = filteredProjects.length > 1 ? 'flex' : 'none';
+  draw();
 }
 
-// ---- NAVBAR ----
+/* ============================================================
+   NAVBAR
+   ============================================================ */
 function initNavbar() {
   const navbar = document.getElementById('navbar');
-  const links = document.querySelectorAll('.nav-link');
+  const links  = document.querySelectorAll('.nav-link');
 
   window.addEventListener('scroll', () => {
     navbar.classList.toggle('scrolled', window.scrollY > 50);
+    document.getElementById('backToTop')?.classList.toggle('visible', window.scrollY > 500);
 
-    // Active section highlight
     const sections = document.querySelectorAll('section[id]');
     let current = '';
-    sections.forEach(s => {
-      if (window.scrollY >= s.offsetTop - 100) current = s.id;
-    });
-    links.forEach(l => {
-      l.classList.toggle('active', l.getAttribute('href') === '#' + current);
-    });
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current));
   });
+
+  // Hamburger
+  const ham  = document.getElementById('hamburger');
+  const navL = document.getElementById('navLinks');
+  if (ham && navL) {
+    ham.addEventListener('click', () => navL.classList.toggle('open'));
+    document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => navL.classList.remove('open')));
+  }
+
+  // Back to top
+  document.getElementById('backToTop')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 }
 
-function initHamburger() {
-  const btn = document.getElementById('hamburger');
-  const links = document.getElementById('nav-links');
-  if (!btn || !links) return;
-  btn.addEventListener('click', () => {
-    links.classList.toggle('open');
-    const spans = btn.querySelectorAll('span');
-    if (links.classList.contains('open')) {
-      spans[0].style.transform = 'rotate(45deg) translate(4.5px, 4.5px)';
-      spans[1].style.opacity = '0';
-      spans[2].style.transform = 'rotate(-45deg) translate(4.5px, -4.5px)';
-    } else {
-      spans.forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
-    }
-  });
-  document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => {
-    links.classList.remove('open');
-    btn.querySelectorAll('span').forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
-  }));
+/* ============================================================
+   AOS — Scroll Reveal
+   ============================================================ */
+function initAOS() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('animated'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('[data-aos]').forEach(el => obs.observe(el));
 }
 
-// ---- COUNTERS ----
+/* ============================================================
+   SKILL BARS
+   ============================================================ */
+function initSkillBars() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.skill-fill').forEach(bar => {
+          const w = bar.dataset.width || '0';
+          setTimeout(() => { bar.style.width = w + '%'; }, 200);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+  const skillsSection = document.getElementById('skills');
+  if (skillsSection) obs.observe(skillsSection);
+}
+
+/* ============================================================
+   COUNTERS
+   ============================================================ */
 function initCounters() {
   const heroSection = document.getElementById('home');
   let done = false;
   const obs = new IntersectionObserver(entries => {
     if (entries[0].isIntersecting && !done) {
       done = true;
-      animateNum('stat-projects', portfolioData ? (portfolioData.projects || []).length : 20);
-      animateNum('stat-clients', 15);
-      animateNum('stat-years', 3);
+      const totalProjects = portfolioData ? (portfolioData.projects || []).length : 20;
+      animateNum('stat-projects', totalProjects);
+      animateNum('stat-clients',  15);
+      animateNum('stat-years',    3);
     }
   }, { threshold: 0.3 });
   if (heroSection) obs.observe(heroSection);
@@ -356,58 +226,333 @@ function animateNum(id, target) {
   const start = Date.now();
   function step() {
     const p = Math.min((Date.now() - start) / dur, 1);
-    el.textContent = Math.floor((1 - Math.pow(1-p, 3)) * target) + (p === 1 ? '+' : '');
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(ease * target);
     if (p < 1) requestAnimationFrame(step);
   }
   step();
 }
 
-// ---- SCROLL REVEAL ----
-function initScrollReveal() {
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.1 });
+/* ============================================================
+   LOAD PORTFOLIO FROM portfolio.json
+   ============================================================ */
+async function loadPortfolio() {
+  try {
+    const res = await fetch(DATA_URL);
+    if (!res.ok) throw new Error('GitHub fetch failed');
+    portfolioData = await res.json();
+  } catch {
+    try {
+      const res = await fetch('portfolio.json?nc=' + Date.now());
+      portfolioData = await res.json();
+    } catch { showGalleryEmpty(); return; }
+  }
 
-  document.querySelectorAll('.section-head, .about-grid, .contact-inner, .footer').forEach(el => {
-    el.classList.add('reveal');
-    obs.observe(el);
+  applySettings(portfolioData.settings);
+  buildFilterBar(portfolioData.categories);
+  filteredProjects = portfolioData.projects || [];
+  renderGallery();
+  renderAllGallery();
+  initCounters();
+  setTimeout(initCursor, 100);
+}
+
+/* ============================================================
+   APPLY SETTINGS
+   ============================================================ */
+function applySettings(s) {
+  if (!s) return;
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+  const setHref = (id, val) => { const el = document.getElementById(id); if (el && val) el.href = val; };
+
+  set('nav-name',    s.name || 'STUDIO');
+  set('footer-name', s.name || 'YOUR NAME');
+  set('footer-year', new Date().getFullYear());
+  set('hero-tagline', s.tagline ? s.tagline.split(' ').slice(0,2).join(' ') : '3D Visualization');
+  set('hero-desc',    s.about ? s.about.split('.')[0] + '.' : '');
+  set('about-title',  s.name || 'The Studio');
+  set('about-text',   s.about || '');
+  set('av-initials',  getInitials(s.name || 'YN'));
+  set('av-title',     s.title || 'Architecture & 3D');
+  set('cd-email',     s.email || '');
+  set('cd-phone',     s.phone || '');
+  if (s.email) setHref('cd-email-link', 'mailto:' + s.email);
+  if (s.phone) setHref('cd-phone-link', 'tel:' + s.phone.replace(/\s/g, ''));
+}
+
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+/* ============================================================
+   FILTER BAR
+   ============================================================ */
+function buildFilterBar(categories) {
+  if (!categories?.length) return;
+  const bar = document.getElementById('filter-bar');
+  if (!bar) return;
+  bar.innerHTML = '';
+  categories.forEach((cat, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (i === 0 ? ' active' : '');
+    btn.dataset.cat = cat.id;
+    btn.textContent = cat.label;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filteredProjects = cat.id === 'all' ? (portfolioData.projects || []) : (portfolioData.projects || []).filter(p => p.category === cat.id);
+      visibleCount = PAGE_SIZE;
+      renderGallery();
+    });
+    bar.appendChild(btn);
   });
 }
 
-// ---- CONTACT FORM ----
+/* ============================================================
+   RENDER GALLERY (Projects Section)
+   ============================================================ */
+function renderGallery() {
+  const grid     = document.getElementById('gallery-grid');
+  const loading  = document.getElementById('gallery-loading');
+  const empty    = document.getElementById('gallery-empty');
+  const loadMore = document.getElementById('load-more-wrap');
+
+  if (loading) loading.style.display = 'none';
+
+  if (!filteredProjects.length) {
+    if (grid) grid.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    if (loadMore) loadMore.style.display = 'none';
+    return;
+  }
+
+  if (empty) empty.style.display = 'none';
+  if (grid)  grid.innerHTML = '';
+
+  const toShow = filteredProjects.slice(0, visibleCount);
+  toShow.forEach((project, idx) => {
+    const item = createMasonryItem(project, idx);
+    if (grid) grid.appendChild(item);
+  });
+
+  setTimeout(() => {
+    document.querySelectorAll('.gallery-masonry-item').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 60);
+    });
+  }, 50);
+
+  if (loadMore) loadMore.style.display = filteredProjects.length > visibleCount ? 'block' : 'none';
+
+  document.getElementById('load-more-btn')?.addEventListener('click', () => {
+    visibleCount += PAGE_SIZE;
+    renderGallery();
+  });
+}
+
+function createMasonryItem(project, idx) {
+  const item = document.createElement('div');
+  item.className = 'gallery-masonry-item';
+
+  const isVideo = ['youtube', 'vimeo', 'video'].includes(project.type);
+  const catLabel = getCategoryLabel(project.category);
+  const thumb = project.thumbnail || project.src;
+
+  item.innerHTML = `
+    ${isVideo ? `
+      <div style="position:relative;min-height:200px;background:#12121f;display:flex;align-items:center;justify-content:center;">
+        ${thumb ? `<img src="${thumb}" alt="${project.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy"/>` : ''}
+        <div class="play-icon" style="position:relative;z-index:2;"><i class="fas fa-play"></i></div>
+      </div>
+      <div class="video-badge"><i class="fas fa-film"></i> ${project.type}</div>
+    ` : `
+      <img src="${thumb}" alt="${project.title}" loading="lazy"/>
+    `}
+    <div class="gmi-overlay">
+      <div class="gmi-cat">${catLabel}</div>
+      <div class="gmi-title">${project.title}</div>
+      <div class="gmi-actions">
+        <button class="gmi-btn" title="View"><i class="fas fa-expand"></i></button>
+      </div>
+    </div>
+  `;
+
+  item.querySelector('.gmi-btn')?.addEventListener('click', () => openLightbox(idx));
+  item.addEventListener('click', () => openLightbox(idx));
+  return item;
+}
+
+/* ============================================================
+   ALL GALLERY SECTION (compact masonry)
+   ============================================================ */
+function renderAllGallery() {
+  const grid = document.getElementById('gallery-all-grid');
+  if (!grid || !portfolioData?.projects?.length) return;
+
+  grid.innerHTML = '';
+  portfolioData.projects.forEach((project, idx) => {
+    const item = document.createElement('div');
+    item.className = 'gmi-item';
+    const thumb = project.thumbnail || project.src;
+    const isVideo = ['youtube','vimeo','video'].includes(project.type);
+
+    item.innerHTML = `
+      ${isVideo
+        ? `<div style="background:#12121f;min-height:120px;display:flex;align-items:center;justify-content:center;position:relative;">
+            ${thumb ? `<img src="${thumb}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy"/>` : ''}
+            <i class="fas fa-play" style="position:relative;z-index:2;color:var(--accent2);font-size:1.5rem;"></i>
+           </div>`
+        : `<img src="${thumb}" alt="${project.title}" loading="lazy"/>`
+      }
+    `;
+    item.addEventListener('click', () => openLightboxAll(idx));
+    grid.appendChild(item);
+  });
+}
+
+function getCategoryLabel(catId) {
+  if (!portfolioData?.categories) return catId;
+  return portfolioData.categories.find(c => c.id === catId)?.label || catId;
+}
+
+function showGalleryEmpty() {
+  document.getElementById('gallery-loading')?.style && (document.getElementById('gallery-loading').style.display = 'none');
+  document.getElementById('gallery-empty')?.style && (document.getElementById('gallery-empty').style.display = 'block');
+}
+
+/* ============================================================
+   LIGHTBOX
+   ============================================================ */
+function initLightbox() {
+  const lb = document.getElementById('lightbox');
+  if (!lb) return;
+
+  document.getElementById('lb-close')?.addEventListener('click', closeLightbox);
+  document.getElementById('lb-prev')?.addEventListener('click',  () => navigateLB(-1));
+  document.getElementById('lb-next')?.addEventListener('click',  () => navigateLB(1));
+  lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape')      closeLightbox();
+    if (e.key === 'ArrowLeft')   navigateLB(-1);
+    if (e.key === 'ArrowRight')  navigateLB(1);
+  });
+}
+
+function openLightbox(idx) {
+  currentLBIndex = idx;
+  renderLBContent(filteredProjects);
+  const lb = document.getElementById('lightbox');
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => lb.classList.add('visible'), 10);
+}
+
+function openLightboxAll(idx) {
+  filteredProjects = portfolioData.projects;
+  openLightbox(idx);
+}
+
+function closeLightbox() {
+  const lb = document.getElementById('lightbox');
+  lb.classList.remove('visible');
+  setTimeout(() => {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+    const content = document.getElementById('lb-content');
+    if (content) {
+      const vid = content.querySelector('video');
+      if (vid) vid.pause();
+      content.innerHTML = '';
+    }
+  }, 300);
+}
+
+function navigateLB(dir) {
+  currentLBIndex = (currentLBIndex + dir + filteredProjects.length) % filteredProjects.length;
+  renderLBContent(filteredProjects);
+}
+
+function renderLBContent(list) {
+  const project = list[currentLBIndex];
+  if (!project) return;
+
+  document.getElementById('lb-title').textContent   = project.title || '';
+  document.getElementById('lb-desc').textContent    = project.description || '';
+  document.getElementById('lb-counter').textContent = `${currentLBIndex + 1} / ${list.length}`;
+
+  const content = document.getElementById('lb-content');
+  content.innerHTML = '';
+
+  if (project.type === 'youtube' || project.type === 'vimeo') {
+    const iframe = document.createElement('iframe');
+    iframe.src = project.src + (project.src.includes('?') ? '&' : '?') + 'autoplay=1';
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+    iframe.allowFullscreen = true;
+    content.appendChild(iframe);
+  } else if (project.type === 'video') {
+    const video = document.createElement('video');
+    video.src = project.src;
+    video.controls = true;
+    video.autoplay = true;
+    content.appendChild(video);
+  } else {
+    const img = document.createElement('img');
+    img.src = project.src;
+    img.alt = project.title;
+    content.appendChild(img);
+  }
+
+  const prevBtn = document.getElementById('lb-prev');
+  const nextBtn = document.getElementById('lb-next');
+  if (prevBtn) prevBtn.style.display = list.length > 1 ? 'flex' : 'none';
+  if (nextBtn) nextBtn.style.display = list.length > 1 ? 'flex' : 'none';
+}
+
+/* ============================================================
+   CONTACT FORM
+   ============================================================ */
 function initContactForm() {
   const form = document.getElementById('contact-form');
   if (!form) return;
   form.addEventListener('submit', e => {
     e.preventDefault();
-    const name = document.getElementById('cf-name').value.trim();
-    const email = document.getElementById('cf-email').value.trim();
-    const service = document.getElementById('cf-service').value;
-    const msg = document.getElementById('cf-message').value.trim();
-    if (!name || !email || !msg) return showToast('Please fill in all required fields', 'error');
-    const subject = `Portfolio Inquiry${service ? ' — ' + service : ''} from ${name}`;
-    const body = `Name: ${name}\nEmail: ${email}\nService: ${service || 'Not specified'}\n\nMessage:\n${msg}`;
-    window.location.href = `mailto:${document.getElementById('cd-email')?.textContent || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    showToast('Opening email client...', 'success');
+    const name    = document.getElementById('cf-name')?.value.trim();
+    const email   = document.getElementById('cf-email')?.value.trim();
+    const service = document.getElementById('cf-service')?.value;
+    const msg     = document.getElementById('cf-message')?.value.trim();
+    if (!name || !email || !msg) return;
+
+    const subject = `Portfolio Inquiry — ${service || 'General'} from ${name}`;
+    const body    = `Name: ${name}\nEmail: ${email}\nService: ${service || 'Not specified'}\n\nMessage:\n${msg}`;
+    const em      = document.getElementById('cd-email')?.textContent || '';
+    window.location.href = `mailto:${em}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    const success = document.getElementById('formSuccess');
+    if (success) { success.style.display = 'flex'; setTimeout(() => success.style.display = 'none', 5000); }
     form.reset();
   });
 }
 
-// ---- TOAST ----
-function showToast(msg, type = 'success') {
-  const t = document.createElement('div');
-  t.style.cssText = `
-    position:fixed;top:90px;right:24px;padding:14px 24px;
-    background:${type==='success' ? 'rgba(201,169,110,0.15)' : 'rgba(239,68,68,0.15)'};
-    border:1px solid ${type==='success' ? 'rgba(201,169,110,0.5)' : 'rgba(239,68,68,0.5)'};
-    color:${type==='success' ? '#c9a96e' : '#f87171'};
-    font-size:0.875rem;font-weight:600;z-index:99999;
-    animation:slideIn 0.3s ease;border-radius:0;font-family:Inter,sans-serif;
-  `;
-  t.textContent = msg;
-  document.body.appendChild(t);
-  const style = document.createElement('style');
-  style.textContent = '@keyframes slideIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}';
-  document.head.appendChild(style);
-  setTimeout(() => t.remove(), 4000);
+/* ============================================================
+   FOOTER YEAR
+   ============================================================ */
+function setFooterYear() {
+  const el = document.getElementById('footer-year');
+  if (el) el.textContent = new Date().getFullYear();
 }
+
+/* ============================================================
+   INIT ALL
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', async () => {
+  initLoader();
+  initParticles();
+  initNavbar();
+  initAOS();
+  initSkillBars();
+  initLightbox();
+  initContactForm();
+  setFooterYear();
+  await loadPortfolio();
+});
