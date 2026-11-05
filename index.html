@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+window.addEventListener('error', function(e) {
+  document.title = 'JS_ERROR: ' + e.message + ' line ' + e.lineno;
+});
+</script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Professional Architecture & 3D Visualization Portfolio — Photorealistic Renderings, Animations, Interior Design"/>
@@ -11,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="style.css?v=9.0"/>
+  <link rel="stylesheet" href="style.css?v=10.0"/>
 </head>
 <body>
 
@@ -522,6 +527,6 @@
   </div>
 </div>
 
-<script src="script.js?v=9.0"></script>
+<script src="script.js?v=10.0"></script>
 </body>
 </html>

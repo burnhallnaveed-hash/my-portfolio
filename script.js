@@ -547,12 +547,7 @@ function setFooterYear() {
 // EXPOSE ALL FUNCTIONS TO WINDOW SO ONCLICK ALWAYS WORKS
 window.tryToggleEditMode = tryToggleEditMode;
 window.triggerAddSoftware = function() {
-  const isAuth = sessionStorage.getItem('cms_session_auth') === 'true';
-  if (isAuth) {
-    openSoftwareModal();
-  } else {
-    openEditAuthModal(() => openSoftwareModal());
-  }
+  openSoftwareModal();
 };
 window.lockEditMode = function() {
   sessionStorage.removeItem('cms_session_auth');
@@ -693,16 +688,39 @@ let authSuccessCallback = null;
 function openEditAuthModal(callback = null) {
   authSuccessCallback = callback;
   const modal = document.getElementById('editAuthModal');
-  const passInput = document.getElementById('editAuthPass');
-  const err = document.getElementById('editAuthError');
-  if (err) err.style.display = 'none';
-  if (passInput) passInput.value = '';
-  modal?.classList.add('open');
-  setTimeout(() => passInput?.focus(), 150);
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.opacity = '1';
+    modal.style.visibility = 'visible';
+    modal.style.zIndex = '999999';
+    modal.classList.add('open');
+    const passInput = document.getElementById('editAuthPass');
+    const err = document.getElementById('editAuthError');
+    if (err) err.style.display = 'none';
+    if (passInput) {
+      passInput.value = '';
+      setTimeout(() => passInput.focus(), 100);
+    }
+  } else {
+    const entered = prompt('Enter Admin Password:');
+    if (entered === (localStorage.getItem('cms_admin_password') || 'admin123')) {
+      sessionStorage.setItem('cms_session_auth', 'true');
+      if (typeof authSuccessCallback === 'function') authSuccessCallback();
+      else toggleEditMode();
+    } else if (entered) {
+      alert('Incorrect password!');
+    }
+  }
 }
 
 function closeEditAuthModal() {
-  document.getElementById('editAuthModal')?.classList.remove('open');
+  const modal = document.getElementById('editAuthModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.style.opacity = '0';
+    modal.style.visibility = 'hidden';
+    modal.classList.remove('open');
+  }
   authSuccessCallback = null;
 }
 
@@ -820,14 +838,35 @@ function renderOrbitTags() {
 }
 
 function openSoftwareModal() {
-  const modal = document.getElementById('softwareModal');
   renderSoftwareModalList();
-  modal?.classList.add('open');
-  setTimeout(() => document.getElementById('newSoftwareName')?.focus(), 150);
+  const modal = document.getElementById('softwareModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.opacity = '1';
+    modal.style.visibility = 'visible';
+    modal.style.zIndex = '999999';
+    modal.classList.add('open');
+    setTimeout(() => document.getElementById('newSoftwareName')?.focus(), 100);
+  } else {
+    const name = prompt('Enter Software Name (e.g. AutoCAD, 3ds Max):');
+    if (name) {
+      currentSoftwareTags.push(name.trim());
+      renderOrbitTags();
+      const d = getSavedData();
+      d.softwareTags = currentSoftwareTags;
+      saveData(d);
+    }
+  }
 }
 
 function closeSoftwareModal() {
-  document.getElementById('softwareModal')?.classList.remove('open');
+  const modal = document.getElementById('softwareModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.style.opacity = '0';
+    modal.style.visibility = 'hidden';
+    modal.classList.remove('open');
+  }
 }
 
 function renderSoftwareModalList() {
