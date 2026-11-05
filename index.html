@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="style.css?v=8.0"/>
+  <link rel="stylesheet" href="style.css?v=9.0"/>
 </head>
 <body>
 
@@ -20,17 +20,17 @@
   <div class="edit-toolbar-inner">
     <div class="edit-brand"><i class="fas fa-wand-magic-sparkles"></i><span>Edit Mode</span></div>
     <div class="edit-tools">
-      <button class="etool etool-save" id="btnSave"><i class="fas fa-floppy-disk"></i> Save</button>
-      <button class="etool etool-softwares" id="btnManageSoftwares"><i class="fas fa-tags"></i> Software Tags</button>
+      <button class="etool etool-save" id="btnSave" onclick="saveAll()"><i class="fas fa-floppy-disk"></i> Save</button>
+      <button class="etool etool-softwares" id="btnManageSoftwares" onclick="openSoftwareModal()"><i class="fas fa-tags"></i> Software Tags</button>
       <button class="etool etool-reset" id="btnReset"><i class="fas fa-rotate-left"></i> Reset</button>
-      <button class="etool etool-lock" id="btnLock" title="Lock & Logout"><i class="fas fa-lock"></i> Lock</button>
+      <button class="etool etool-lock" id="btnLock" onclick="lockEditMode()" title="Lock & Logout"><i class="fas fa-lock"></i> Lock</button>
     </div>
     <div class="edit-hint"><i class="fas fa-circle-info"></i> Text par click karein = edit · <strong>Ctrl+E</strong> = Toggle · <strong>Ctrl+S</strong> = Save</div>
   </div>
 </div>
 
 <!-- EDIT TOGGLE BUTTON -->
-<button class="edit-toggle-btn" id="editToggleBtn">
+<button class="edit-toggle-btn" id="editToggleBtn" onclick="tryToggleEditMode()">
   <i class="fas fa-pen-to-square" id="editIcon"></i>
   <span id="editLabel">Edit Mode</span>
 </button>
@@ -66,9 +66,7 @@
   }, 1200);
 </script>
 
-<!-- CUSTOM CURSOR -->
-<div class="cursor" id="cursor"></div>
-<div class="cursor-follower" id="cursorFollower"></div>
+
 
 <!-- NAVBAR -->
 <nav class="navbar" id="navbar">
@@ -86,7 +84,7 @@
     <a href="#contact"  class="nav-link">Contact</a>
   </div>
   <div class="nav-actions">
-    <button class="btn-edit-nav" id="navEditBtn" title="Direct Visual Edit"><i class="fas fa-pen-to-square"></i> <span>Edit Website</span></button>
+    <button class="btn-edit-nav" id="navEditBtn" onclick="tryToggleEditMode()" title="Direct Visual Edit"><i class="fas fa-pen-to-square"></i> <span>Edit Website</span></button>
     <a href="#contact" class="btn-hire">Hire Me</a>
     <a href="admin/" class="btn-admin-nav" title="Admin Panel"><i class="fas fa-cog"></i></a>
     <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
@@ -146,11 +144,11 @@
         <span class="tag t2">Revit</span>
         <span class="tag t3">D5 Render</span>
         <span class="tag t4">Animation</span>
-        <span class="tag tag-add-pill" id="orbitPillTag" style="top:-8%;left:32%;"><i class="fas fa-plus"></i> Add Software</span>
+        <span class="tag tag-add-pill" id="orbitPillTag" onclick="triggerAddSoftware()" style="top:-8%;left:32%;"><i class="fas fa-plus"></i> Add Software</span>
       </div>
     </div>
     <div class="orbit-actions-bar" style="margin-top:1.5rem;text-align:center;position:relative;z-index:25;">
-      <button type="button" class="btn-orbit-add-pill" id="orbitAddBtn">
+      <button type="button" class="btn-orbit-add-pill" id="orbitAddBtn" onclick="triggerAddSoftware()">
         <i class="fas fa-plus-circle"></i> Add Software Tag
       </button>
     </div>
@@ -457,7 +455,7 @@
   <div class="modal-box modal-sm">
     <div class="modal-header">
       <h3><i class="fas fa-lock"></i> Owner Verification</h3>
-      <button class="modal-close" id="editAuthClose"><i class="fas fa-xmark"></i></button>
+      <button class="modal-close" id="editAuthClose" onclick="closeEditAuthModal()"><i class="fas fa-xmark"></i></button>
     </div>
     <div class="modal-body">
       <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.8rem;">
@@ -472,8 +470,8 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" id="editAuthCancel">Cancel</button>
-      <button class="btn-primary" id="editAuthSubmit"><i class="fas fa-unlock"></i> Unlock & Edit</button>
+      <button class="btn-secondary" id="editAuthCancel" onclick="closeEditAuthModal()">Cancel</button>
+      <button class="btn-primary" id="editAuthSubmit" onclick="handleEditAuth()"><i class="fas fa-unlock"></i> Unlock & Edit</button>
     </div>
   </div>
 </div>
@@ -492,7 +490,7 @@
   <div class="modal-box">
     <div class="modal-header">
       <h3><i class="fas fa-circle-nodes"></i> Orbit Softwares Manager</h3>
-      <button class="modal-close" id="softwareModalClose"><i class="fas fa-xmark"></i></button>
+      <button class="modal-close" id="softwareModalClose" onclick="closeSoftwareModal()"><i class="fas fa-xmark"></i></button>
     </div>
     <div class="modal-body">
       <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem;">
@@ -509,7 +507,7 @@
         <label for="newSoftwareName">Naya Software Name</label>
         <div style="display:flex;gap:0.5rem;">
           <input type="text" id="newSoftwareName" placeholder="e.g. AutoCAD, 3ds Max, Lumion..." style="flex:1;"/>
-          <button type="button" class="btn-primary" id="btnAddNewSoftware" style="padding:0.6rem 1.2rem;white-space:nowrap;">
+          <button type="button" class="btn-primary" id="btnAddNewSoftware" onclick="addNewSoftwareTag()" style="padding:0.6rem 1.2rem;white-space:nowrap;">
             <i class="fas fa-plus"></i> Add
           </button>
         </div>
@@ -519,11 +517,11 @@
       </p>
     </div>
     <div class="modal-footer">
-      <button class="btn-primary" id="softwareModalDone"><i class="fas fa-check"></i> Done & Apply</button>
+      <button class="btn-primary" id="softwareModalDone" onclick="closeSoftwareModal(); saveAll();"><i class="fas fa-check"></i> Done & Apply</button>
     </div>
   </div>
 </div>
 
-<script src="script.js?v=8.0"></script>
+<script src="script.js?v=9.0"></script>
 </body>
 </html>

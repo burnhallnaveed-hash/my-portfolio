@@ -543,6 +543,29 @@ function setFooterYear() {
    ============================================================ */
 
 
+
+// EXPOSE ALL FUNCTIONS TO WINDOW SO ONCLICK ALWAYS WORKS
+window.tryToggleEditMode = tryToggleEditMode;
+window.triggerAddSoftware = function() {
+  const isAuth = sessionStorage.getItem('cms_session_auth') === 'true';
+  if (isAuth) {
+    openSoftwareModal();
+  } else {
+    openEditAuthModal(() => openSoftwareModal());
+  }
+};
+window.lockEditMode = function() {
+  sessionStorage.removeItem('cms_session_auth');
+  if (editMode) toggleEditMode();
+  showToast('🔒 Edit Mode lock ho gaya!', 'error');
+};
+window.openSoftwareModal = openSoftwareModal;
+window.closeSoftwareModal = closeSoftwareModal;
+window.addNewSoftwareTag = addNewSoftwareTag;
+window.saveAll = saveAll;
+window.handleEditAuth = handleEditAuth;
+window.closeEditAuthModal = closeEditAuthModal;
+
 function initEditMode() {
   const btn = document.getElementById('editToggleBtn');
   const navBtn = document.getElementById('navEditBtn');
