@@ -186,12 +186,31 @@ input,textarea,select{font-family:inherit;font-size:1rem;outline:none;border:non
 .center-icon span{font-size:.75rem;font-weight:700;letter-spacing:1px;margin-top:2px}
 @keyframes glowPulse{0%,100%{box-shadow:0 0 40px rgba(124,58,237,.5)}50%{box-shadow:0 0 80px rgba(168,85,247,.8)}}
 .floating-tags{position:absolute;inset:0;pointer-events:none}
-.tag{position:absolute;padding:.4rem .9rem;background:rgba(13,13,24,.9);border:1px solid var(--border);border-radius:50px;font-size:.75rem;font-weight:600;backdrop-filter:blur(10px);animation:floatTag 4s ease-in-out infinite}
-.t1{top:10%;left:-10%;animation-delay:0s;border-color:rgba(247,147,30,.3);color:#f7931e}
-.t2{top:10%;right:-10%;animation-delay:1s;border-color:rgba(6,150,215,.3);color:#0696d7}
-.t3{bottom:25%;left:-15%;animation-delay:2s;border-color:rgba(16,185,129,.3);color:var(--green)}
-.t4{bottom:15%;right:-10%;animation-delay:.5s;border-color:rgba(168,85,247,.3);color:var(--accent2)}
+.tag{position:absolute;padding:.4rem .9rem;background:rgba(13,13,24,.9);border:1px solid var(--border);border-radius:50px;font-size:.75rem;font-weight:600;backdrop-filter:blur(10px);animation:floatTag 4s ease-in-out infinite;pointer-events:auto;white-space:nowrap}
+.t1{top:8%;left:-12%;animation-delay:0s;border-color:rgba(247,147,30,.4);color:#f7931e}
+.t2{top:8%;right:-12%;animation-delay:1s;border-color:rgba(6,150,215,.4);color:#0696d7}
+.t3{bottom:25%;left:-18%;animation-delay:2s;border-color:rgba(16,185,129,.4);color:var(--green)}
+.t4{bottom:15%;right:-12%;animation-delay:.5s;border-color:rgba(168,85,247,.4);color:var(--accent2)}
+.t5{top:-12%;left:36%;animation-delay:1.5s;border-color:rgba(245,158,11,.4);color:#f59e0b}
+.t6{bottom:-8%;left:36%;animation-delay:2.5s;border-color:rgba(236,72,153,.4);color:#ec4899}
+.t7{top:46%;left:-24%;animation-delay:3s;border-color:rgba(56,189,248,.4);color:#38bdf8}
+.t8{top:46%;right:-24%;animation-delay:1.8s;border-color:rgba(139,92,246,.4);color:#8b5cf6}
+.t9{top:28%;right:-26%;animation-delay:2.2s;border-color:rgba(52,211,153,.4);color:#34d399}
+.t10{bottom:35%;left:-22%;animation-delay:.8s;border-color:rgba(244,63,94,.4);color:#f43f5e}
+.t11{top:28%;left:-24%;animation-delay:1.2s;border-color:rgba(251,191,36,.4);color:#fbbf24}
+.t12{bottom:35%;right:-22%;animation-delay:2.8s;border-color:rgba(147,197,253,.4);color:#93c5fd}
 @keyframes floatTag{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+.btn-orbit-add{position:absolute;bottom:-2.8rem;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:.4rem;padding:.45rem 1.1rem;background:rgba(124,58,237,.2);border:1px dashed var(--accent2);border-radius:50px;color:var(--accent2);font-size:.8rem;font-weight:600;cursor:pointer;transition:var(--transition);z-index:10}
+.btn-orbit-add:hover{background:var(--accent);color:#fff;border-style:solid;transform:translateX(-50%) translateY(-2px);box-shadow:0 6px 20px rgba(124,58,237,.5)}
+body.edit-mode .btn-orbit-add{display:inline-flex}
+
+.modal-tag-chip{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .85rem;background:var(--surface);border:1px solid var(--border);border-radius:50px;font-size:.82rem;font-weight:600;color:var(--text);transition:var(--transition)}
+.modal-tag-chip:hover{border-color:var(--accent2)}
+.chip-del-btn{background:transparent;border:none;color:#ef4444;cursor:pointer;font-size:.8rem;padding:2px 4px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.chip-del-btn:hover{background:rgba(239,68,68,.2);transform:scale(1.2)}
+.etool-softwares{background:rgba(56,189,248,.3);border-color:rgba(56,189,248,.5)}
+.etool-softwares:hover{background:rgba(56,189,248,.6)}
 
 .scroll-indicator{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;font-size:.75rem;color:var(--text-muted);animation:fadeSlideIn 1s ease 2s both;z-index:2}
 .scroll-mouse{width:24px;height:38px;border:2px solid rgba(255,255,255,.2);border-radius:12px;display:flex;justify-content:center;padding-top:6px}

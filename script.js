@@ -278,6 +278,10 @@ function applySettings(s) {
   set('cd-phone',     s.phone || '');
   if (s.email) setHref('cd-email-link', 'mailto:' + s.email);
   if (s.phone) setHref('cd-phone-link', 'tel:' + s.phone.replace(/\s/g, ''));
+  if (s.softwareTags && Array.isArray(s.softwareTags) && s.softwareTags.length) {
+    currentSoftwareTags = s.softwareTags;
+    renderOrbitTags();
+  }
 }
 
 function getInitials(name) {
@@ -563,6 +567,7 @@ document.addEventListener('DOMContentLoaded', async () => {
    ============================================================ */
 let editMode = false;
 let currentSocialPlatform = '';
+let currentSoftwareTags = ['Blender', 'Revit', 'D5 Render', 'Animation'];
 
 function initEditMode() {
   const btn = document.getElementById('editToggleBtn');
@@ -576,6 +581,22 @@ function initEditMode() {
       showToast('🔄 Reset! Reload ho raha hai...', 'error');
       setTimeout(() => location.reload(), 1200);
     }
+  });
+
+  // Manage software tags
+  document.getElementById('btnManageSoftwares')?.addEventListener('click', openSoftwareModal);
+  document.getElementById('orbitAddBtn')?.addEventListener('click', openSoftwareModal);
+  document.getElementById('softwareModalClose')?.addEventListener('click', closeSoftwareModal);
+  document.getElementById('softwareModalDone')?.addEventListener('click', () => {
+    closeSoftwareModal();
+    saveAll();
+  });
+  document.getElementById('btnAddNewSoftware')?.addEventListener('click', addNewSoftwareTag);
+  document.getElementById('newSoftwareName')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addNewSoftwareTag(); }
+  });
+  document.getElementById('softwareModal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('softwareModal')) closeSoftwareModal();
   });
 
   // Lock button
@@ -722,6 +743,88 @@ function toggleEditMode() {
     document.querySelectorAll('.editable').forEach(el => el.removeAttribute('contenteditable'));
     showToast('✅ View Mode — changes browser mein save hain!');
   }
+  renderOrbitTags();
+}
+
+function renderOrbitTags() {
+  const container = document.getElementById('floatingTags');
+  if (!container) return;
+  container.innerHTML = '';
+  currentSoftwareTags.forEach((name, i) => {
+    const span = document.createElement('span');
+    span.className = `tag t${(i % 12) + 1}${editMode ? ' editable' : ''}`;
+    span.textContent = name;
+    if (editMode) {
+      span.setAttribute('contenteditable', 'true');
+      span.setAttribute('spellcheck', 'false');
+      span.title = 'Click to edit text';
+      span.addEventListener('input', () => {
+        currentSoftwareTags[i] = span.textContent.trim();
+        const d = getSavedData();
+        d.softwareTags = currentSoftwareTags;
+        saveData(d);
+      });
+    }
+    container.appendChild(span);
+  });
+}
+
+function openSoftwareModal() {
+  const modal = document.getElementById('softwareModal');
+  renderSoftwareModalList();
+  modal?.classList.add('open');
+  setTimeout(() => document.getElementById('newSoftwareName')?.focus(), 150);
+}
+
+function closeSoftwareModal() {
+  document.getElementById('softwareModal')?.classList.remove('open');
+}
+
+function renderSoftwareModalList() {
+  const list = document.getElementById('softwareTagsList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!currentSoftwareTags.length) {
+    list.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem;padding:0.4rem;">Koi software tag nahi hai. Neeche se add karein.</span>';
+    return;
+  }
+  currentSoftwareTags.forEach((tag, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'modal-tag-chip';
+    chip.innerHTML = `
+      <span>${tag}</span>
+      <button type="button" class="chip-del-btn" title="Delete"><i class="fas fa-xmark"></i></button>
+    `;
+    chip.querySelector('.chip-del-btn').addEventListener('click', () => {
+      currentSoftwareTags.splice(idx, 1);
+      renderSoftwareModalList();
+      renderOrbitTags();
+      const d = getSavedData();
+      d.softwareTags = currentSoftwareTags;
+      saveData(d);
+      showToast('🗑️ Tag remove ho gaya!');
+    });
+    list.appendChild(chip);
+  });
+}
+
+function addNewSoftwareTag() {
+  const input = document.getElementById('newSoftwareName');
+  const val = input?.value.trim();
+  if (!val) return;
+  if (currentSoftwareTags.length >= 12) {
+    showToast('⚠️ Maximum 12 software tags rakh sakte hain', 'error');
+    return;
+  }
+  currentSoftwareTags.push(val);
+  input.value = '';
+  renderSoftwareModalList();
+  renderOrbitTags();
+  const d = getSavedData();
+  d.softwareTags = currentSoftwareTags;
+  saveData(d);
+  showToast(`✨ "${val}" circle mein add ho gaya!`);
+}
 }
 
 function openSocialModal(platform, el) {
@@ -749,6 +852,7 @@ async function saveAll() {
   if (img && img.style.display !== 'none' && img.src && img.src.startsWith('data:')) {
     data.profilePhoto = img.src;
   }
+  data.softwareTags = currentSoftwareTags;
   saveData(data);
 
   // Sync to GitHub if token exists in browser
@@ -757,6 +861,7 @@ async function saveAll() {
     try {
       showToast('☁️ GitHub par publish ho raha hai...', 'success');
       portfolioData.settings = portfolioData.settings || {};
+      portfolioData.settings.softwareTags = currentSoftwareTags;
       const heroLine2 = document.querySelector('[data-key="heroLine2"]')?.textContent?.trim();
       const heroDesc  = document.querySelector('[data-key="heroDesc"]')?.textContent?.trim();
       const aboutText = document.querySelector('[data-key="aboutText"]')?.textContent?.trim();
@@ -848,6 +953,10 @@ function loadSavedEdits() {
       document.querySelectorAll(`[data-platform="${platform}"]`).forEach(el => el.href = url);
     });
   }
+  if (data.softwareTags && Array.isArray(data.softwareTags) && data.softwareTags.length) {
+    currentSoftwareTags = data.softwareTags;
+  }
+  renderOrbitTags();
 }
 
 function showToast(msg, type = 'success') {

@@ -21,6 +21,7 @@
     <div class="edit-brand"><i class="fas fa-wand-magic-sparkles"></i><span>Edit Mode</span></div>
     <div class="edit-tools">
       <button class="etool etool-save" id="btnSave"><i class="fas fa-floppy-disk"></i> Save</button>
+      <button class="etool etool-softwares" id="btnManageSoftwares"><i class="fas fa-tags"></i> Software Tags</button>
       <button class="etool etool-reset" id="btnReset"><i class="fas fa-rotate-left"></i> Reset</button>
       <button class="etool etool-lock" id="btnLock" title="Lock & Logout"><i class="fas fa-lock"></i> Lock</button>
     </div>
@@ -134,12 +135,15 @@
         </div>
         <div class="center-icon"><i class="fas fa-hexagon"></i><span>3D</span></div>
       </div>
-      <div class="floating-tags">
+      <div class="floating-tags" id="floatingTags">
         <span class="tag t1">Blender</span>
         <span class="tag t2">Revit</span>
         <span class="tag t3">D5 Render</span>
         <span class="tag t4">Animation</span>
       </div>
+      <button type="button" class="btn-orbit-add" id="orbitAddBtn" title="Add / Edit Software Tags">
+        <i class="fas fa-plus"></i> Add Software
+      </button>
     </div>
   </div>
   <div class="scroll-indicator">
@@ -471,6 +475,43 @@
     <div class="modal-header"><h3><i class="fas fa-link"></i> Social Link</h3><button class="modal-close" id="socialModalClose"><i class="fas fa-xmark"></i></button></div>
     <div class="modal-body"><div class="mfield"><label id="socialModalLabel">Link</label><input type="url" id="socialUrlInput" placeholder="https://..."/></div></div>
     <div class="modal-footer"><button class="btn-secondary" id="socialModalCancel">Cancel</button><button class="btn-primary" id="socialModalSave"><i class="fas fa-check"></i> Save</button></div>
+  </div>
+</div>
+
+<!-- SOFTWARE TAGS MODAL -->
+<div class="modal-overlay" id="softwareModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3><i class="fas fa-circle-nodes"></i> Orbit Softwares Manager</h3>
+      <button class="modal-close" id="softwareModalClose"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem;">
+        Circle ke ird-gird floating software tags add ya remove karein:
+      </p>
+      
+      <!-- List of tags -->
+      <div id="softwareTagsList" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:0.8rem 0;padding:0.75rem;background:var(--surface2);border-radius:12px;min-height:50px;max-height:160px;overflow-y:auto;">
+        <!-- Dynamic tags chips -->
+      </div>
+
+      <!-- Add new tag input -->
+      <div class="mfield">
+        <label for="newSoftwareName">Naya Software Name</label>
+        <div style="display:flex;gap:0.5rem;">
+          <input type="text" id="newSoftwareName" placeholder="e.g. AutoCAD, 3ds Max, Lumion..." style="flex:1;"/>
+          <button type="button" class="btn-primary" id="btnAddNewSoftware" style="padding:0.6rem 1.2rem;white-space:nowrap;">
+            <i class="fas fa-plus"></i> Add
+          </button>
+        </div>
+      </div>
+      <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.4rem;">
+        💡 Tip: Aap kisi bhi tag par click kar ke delete ❌ kar sakte hain. Add hone ke baad "Done" dabayein.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" id="softwareModalDone"><i class="fas fa-check"></i> Done & Apply</button>
+    </div>
   </div>
 </div>
 
