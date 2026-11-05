@@ -23,16 +23,27 @@ function initLoader() {
   const percent  = document.getElementById('loaderPercent');
   if (!loader) return;
 
+  // Maximum fail-safe: automatically dismiss after 1 second
+  const forceDismiss = setTimeout(() => {
+    loader.classList.add('hidden');
+    setTimeout(() => { loader.style.display = 'none'; }, 400);
+  }, 1000);
+
   let val = 0;
   const timer = setInterval(() => {
-    val += Math.random() * 15 + 3;
-    if (val >= 100) { val = 100; clearInterval(timer); }
+    val += Math.random() * 25 + 15;
+    if (val >= 100) {
+      val = 100;
+      clearInterval(timer);
+      clearTimeout(forceDismiss);
+      setTimeout(() => {
+        loader.classList.add('hidden');
+        setTimeout(() => { loader.style.display = 'none'; }, 400);
+      }, 200);
+    }
     if (progress) progress.style.width = val + '%';
     if (percent)  percent.textContent  = Math.floor(val) + '%';
-    if (val === 100) {
-      setTimeout(() => { loader.classList.add('hidden'); }, 400);
-    }
-  }, 60);
+  }, 40);
 }
 
 /* ============================================================
@@ -549,18 +560,27 @@ function setFooterYear() {
 /* ============================================================
    INIT ALL
    ============================================================ */
-document.addEventListener('DOMContentLoaded', async () => {
+function bootPortfolio() {
   initLoader();
-  initParticles();
-  initNavbar();
-  initAOS();
-  initSkillBars();
-  initLightbox();
-  initContactForm();
-  setFooterYear();
-  await loadPortfolio();
-  initEditMode();
-});
+  try { initParticles(); } catch(e){ console.warn(e); }
+  try { initNavbar(); } catch(e){ console.warn(e); }
+  try { initAOS(); } catch(e){ console.warn(e); }
+  try { initSkillBars(); } catch(e){ console.warn(e); }
+  try { initLightbox(); } catch(e){ console.warn(e); }
+  try { initContactForm(); } catch(e){ console.warn(e); }
+  try { setFooterYear(); } catch(e){ console.warn(e); }
+  loadPortfolio().catch(err => {
+    console.error('loadPortfolio error:', err);
+    showGalleryEmpty();
+  });
+  try { initEditMode(); } catch(e){ console.warn(e); }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootPortfolio);
+} else {
+  bootPortfolio();
+}
 
 /* ============================================================
    EDIT MODE SYSTEM
