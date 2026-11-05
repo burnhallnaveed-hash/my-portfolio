@@ -566,9 +566,9 @@ let currentSocialPlatform = '';
 
 function initEditMode() {
   const btn = document.getElementById('editToggleBtn');
-  if (!btn) return;
-
-  btn.addEventListener('click', toggleEditMode);
+  const navBtn = document.getElementById('navEditBtn');
+  if (btn) btn.addEventListener('click', tryToggleEditMode);
+  if (navBtn) navBtn.addEventListener('click', tryToggleEditMode);
   document.getElementById('btnSave')?.addEventListener('click', saveAll);
   document.getElementById('btnReset')?.addEventListener('click', () => {
     if (confirm('⚠️ Sab local edits reset ho jayengi! Sure hain?')) {
@@ -576,6 +576,24 @@ function initEditMode() {
       showToast('🔄 Reset! Reload ho raha hai...', 'error');
       setTimeout(() => location.reload(), 1200);
     }
+  });
+
+  // Lock button
+  document.getElementById('btnLock')?.addEventListener('click', () => {
+    sessionStorage.removeItem('cms_session_auth');
+    if (editMode) toggleEditMode();
+    showToast('🔒 Edit Mode lock ho gaya!', 'error');
+  });
+
+  // Password verification modal
+  document.getElementById('editAuthClose')?.addEventListener('click', closeEditAuthModal);
+  document.getElementById('editAuthCancel')?.addEventListener('click', closeEditAuthModal);
+  document.getElementById('editAuthSubmit')?.addEventListener('click', handleEditAuth);
+  document.getElementById('editAuthPass')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleEditAuth();
+  });
+  document.getElementById('editAuthModal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('editAuthModal')) closeEditAuthModal();
   });
 
   // Profile photo upload
@@ -617,11 +635,57 @@ function initEditMode() {
 
   // Keyboard shortcuts
   document.addEventListener('keydown', e => {
-    if (e.ctrlKey && e.key.toLowerCase() === 'e') { e.preventDefault(); toggleEditMode(); }
+    if (e.ctrlKey && e.key.toLowerCase() === 'e') { e.preventDefault(); tryToggleEditMode(); }
     if (e.ctrlKey && e.key.toLowerCase() === 's' && editMode) { e.preventDefault(); saveAll(); }
   });
 
   loadSavedEdits();
+}
+
+function tryToggleEditMode() {
+  if (editMode) {
+    toggleEditMode();
+    return;
+  }
+  const isAuth = sessionStorage.getItem('cms_session_auth') === 'true';
+  if (isAuth) {
+    toggleEditMode();
+  } else {
+    openEditAuthModal();
+  }
+}
+
+function openEditAuthModal() {
+  const modal = document.getElementById('editAuthModal');
+  const passInput = document.getElementById('editAuthPass');
+  const err = document.getElementById('editAuthError');
+  if (err) err.style.display = 'none';
+  if (passInput) passInput.value = '';
+  modal?.classList.add('open');
+  setTimeout(() => passInput?.focus(), 150);
+}
+
+function closeEditAuthModal() {
+  document.getElementById('editAuthModal')?.classList.remove('open');
+}
+
+function handleEditAuth() {
+  const passInput = document.getElementById('editAuthPass');
+  const entered = passInput?.value || '';
+  const savedPass = localStorage.getItem('cms_admin_password') || 'admin123';
+  const err = document.getElementById('editAuthError');
+
+  if (entered === savedPass) {
+    sessionStorage.setItem('cms_session_auth', 'true');
+    closeEditAuthModal();
+    toggleEditMode();
+  } else {
+    if (err) {
+      err.style.display = 'block';
+      err.textContent = '❌ Incorrect password! Access denied.';
+    }
+    passInput?.focus();
+  }
 }
 
 function toggleEditMode() {
@@ -670,7 +734,12 @@ function openSocialModal(platform, el) {
   document.getElementById('socialModal')?.classList.add('open');
 }
 
-function saveAll() {
+async function saveAll() {
+  const saveBtn = document.getElementById('btnSave');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+  }
   const data = getSavedData();
   data.text = data.text || {};
   document.querySelectorAll('.editable[data-key]').forEach(el => {
@@ -681,7 +750,70 @@ function saveAll() {
     data.profilePhoto = img.src;
   }
   saveData(data);
-  showToast('💾 Tamam changes save ho gaye!');
+
+  // Sync to GitHub if token exists in browser
+  const token = localStorage.getItem('cms_gh_token');
+  if (token && portfolioData) {
+    try {
+      showToast('☁️ GitHub par publish ho raha hai...', 'success');
+      portfolioData.settings = portfolioData.settings || {};
+      const heroLine2 = document.querySelector('[data-key="heroLine2"]')?.textContent?.trim();
+      const heroDesc  = document.querySelector('[data-key="heroDesc"]')?.textContent?.trim();
+      const aboutText = document.querySelector('[data-key="aboutText"]')?.textContent?.trim();
+      const aboutTitle= document.querySelector('[data-key="aboutTitle"]')?.textContent?.trim();
+      const contactEm = document.querySelector('[data-key="contactEmail"]')?.textContent?.trim();
+      const contactPh = document.querySelector('[data-key="contactPhone"]')?.textContent?.trim();
+
+      if (aboutTitle) portfolioData.settings.name = aboutTitle;
+      if (heroLine2)  portfolioData.settings.tagline = heroLine2;
+      if (aboutText)  portfolioData.settings.about = aboutText;
+      if (contactEm)  portfolioData.settings.email = contactEm;
+      if (contactPh)  portfolioData.settings.phone = contactPh;
+
+      const fileRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/portfolio.json`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      let sha = null;
+      if (fileRes.ok) {
+        const fileJson = await fileRes.json();
+        sha = fileJson.sha;
+      }
+
+      const jsonString = JSON.stringify(portfolioData, null, 2);
+      const base64Json = btoa(unescape(encodeURIComponent(jsonString)));
+
+      const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/portfolio.json`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: 'Update portfolio directly from website edit mode',
+          content: base64Json,
+          sha: sha,
+          branch: BRANCH
+        })
+      });
+
+      if (putRes.ok) {
+        showToast('🚀 Live website update ho gayi aur GitHub par save ho gayi!');
+      } else {
+        showToast('💾 Changes browser mein save ho gaye!');
+      }
+    } catch (e) {
+      console.warn(e);
+      showToast('💾 Changes browser mein save ho gaye!');
+    }
+  } else {
+    showToast('💾 Tamam changes browser mein save ho gaye!');
+  }
+
+  if (saveBtn) {
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save';
+  }
 }
 
 function getSavedData() {
