@@ -585,7 +585,14 @@ function initEditMode() {
 
   // Manage software tags
   document.getElementById('btnManageSoftwares')?.addEventListener('click', openSoftwareModal);
-  document.getElementById('orbitAddBtn')?.addEventListener('click', openSoftwareModal);
+  document.getElementById('orbitAddBtn')?.addEventListener('click', () => {
+    const isAuth = sessionStorage.getItem('cms_session_auth') === 'true';
+    if (isAuth) {
+      openSoftwareModal();
+    } else {
+      openEditAuthModal(() => openSoftwareModal());
+    }
+  });
   document.getElementById('softwareModalClose')?.addEventListener('click', closeSoftwareModal);
   document.getElementById('softwareModalDone')?.addEventListener('click', () => {
     closeSoftwareModal();
@@ -676,7 +683,10 @@ function tryToggleEditMode() {
   }
 }
 
-function openEditAuthModal() {
+let authSuccessCallback = null;
+
+function openEditAuthModal(callback = null) {
+  authSuccessCallback = callback;
   const modal = document.getElementById('editAuthModal');
   const passInput = document.getElementById('editAuthPass');
   const err = document.getElementById('editAuthError');
@@ -688,6 +698,7 @@ function openEditAuthModal() {
 
 function closeEditAuthModal() {
   document.getElementById('editAuthModal')?.classList.remove('open');
+  authSuccessCallback = null;
 }
 
 function handleEditAuth() {
@@ -699,7 +710,13 @@ function handleEditAuth() {
   if (entered === savedPass) {
     sessionStorage.setItem('cms_session_auth', 'true');
     closeEditAuthModal();
-    toggleEditMode();
+    if (typeof authSuccessCallback === 'function') {
+      const cb = authSuccessCallback;
+      authSuccessCallback = null;
+      cb();
+    } else {
+      toggleEditMode();
+    }
   } else {
     if (err) {
       err.style.display = 'block';
@@ -757,16 +774,44 @@ function renderOrbitTags() {
     if (editMode) {
       span.setAttribute('contenteditable', 'true');
       span.setAttribute('spellcheck', 'false');
-      span.title = 'Click to edit text';
+      span.title = 'Click to edit text directly';
       span.addEventListener('input', () => {
         currentSoftwareTags[i] = span.textContent.trim();
         const d = getSavedData();
         d.softwareTags = currentSoftwareTags;
         saveData(d);
       });
+    } else {
+      span.title = 'Click to manage softwares';
+      span.style.cursor = 'pointer';
+      span.addEventListener('click', () => {
+        const isAuth = sessionStorage.getItem('cms_session_auth') === 'true';
+        if (isAuth) {
+          openSoftwareModal();
+        } else {
+          openEditAuthModal(() => openSoftwareModal());
+        }
+      });
     }
     container.appendChild(span);
   });
+
+  // Always show '+ Add Software' pill in the circle
+  const addPill = document.createElement('span');
+  addPill.className = 'tag tag-add-pill';
+  addPill.style.top = '-8%';
+  addPill.style.left = '32%';
+  addPill.innerHTML = '<i class="fas fa-plus"></i> Add Software';
+  addPill.title = 'Click to add more softwares to this circle';
+  addPill.addEventListener('click', () => {
+    const isAuth = sessionStorage.getItem('cms_session_auth') === 'true';
+    if (isAuth) {
+      openSoftwareModal();
+    } else {
+      openEditAuthModal(() => openSoftwareModal());
+    }
+  });
+  container.appendChild(addPill);
 }
 
 function openSoftwareModal() {
