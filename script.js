@@ -555,4 +555,179 @@ document.addEventListener('DOMContentLoaded', async () => {
   initContactForm();
   setFooterYear();
   await loadPortfolio();
+  initEditMode();
 });
+
+/* ============================================================
+   EDIT MODE SYSTEM
+   ============================================================ */
+let editMode = false;
+let currentSocialPlatform = '';
+
+function initEditMode() {
+  const btn = document.getElementById('editToggleBtn');
+  if (!btn) return;
+
+  btn.addEventListener('click', toggleEditMode);
+  document.getElementById('btnSave')?.addEventListener('click', saveAll);
+  document.getElementById('btnReset')?.addEventListener('click', () => {
+    if (confirm('⚠️ Sab local edits reset ho jayengi! Sure hain?')) {
+      localStorage.removeItem('portfolio_edit_data');
+      showToast('🔄 Reset! Reload ho raha hai...', 'error');
+      setTimeout(() => location.reload(), 1200);
+    }
+  });
+
+  // Profile photo upload
+  document.getElementById('fileInputPhoto')?.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById('profilePhoto');
+      const ph  = document.getElementById('avatarPlaceholder');
+      if (img) { img.src = e.target.result; img.style.display = 'block'; }
+      if (ph)  ph.style.display = 'none';
+      const data = getSavedData();
+      data.profilePhoto = e.target.result;
+      saveData(data);
+      showToast('📸 Profile photo update ho gayi!');
+    };
+    reader.readAsDataURL(file);
+    this.value = '';
+  });
+
+  // Social modal buttons
+  document.getElementById('socialModalClose')?.addEventListener('click',  () => document.getElementById('socialModal').classList.remove('open'));
+  document.getElementById('socialModalCancel')?.addEventListener('click', () => document.getElementById('socialModal').classList.remove('open'));
+  document.getElementById('socialModal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('socialModal')) document.getElementById('socialModal').classList.remove('open');
+  });
+  document.getElementById('socialModalSave')?.addEventListener('click', () => {
+    const url = document.getElementById('socialUrlInput')?.value.trim();
+    if (!url) return;
+    document.querySelectorAll(`[data-platform="${currentSocialPlatform}"]`).forEach(el => el.href = url);
+    const data = getSavedData();
+    data.socialLinks = data.socialLinks || {};
+    data.socialLinks[currentSocialPlatform] = url;
+    saveData(data);
+    document.getElementById('socialModal').classList.remove('open');
+    showToast(`🔗 ${currentSocialPlatform} link save ho gaya!`);
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey && e.key.toLowerCase() === 'e') { e.preventDefault(); toggleEditMode(); }
+    if (e.ctrlKey && e.key.toLowerCase() === 's' && editMode) { e.preventDefault(); saveAll(); }
+  });
+
+  loadSavedEdits();
+}
+
+function toggleEditMode() {
+  editMode = !editMode;
+  const btn   = document.getElementById('editToggleBtn');
+  const icon  = document.getElementById('editIcon');
+  const label = document.getElementById('editLabel');
+
+  document.body.classList.toggle('edit-mode', editMode);
+  document.getElementById('editToolbar')?.classList.toggle('active', editMode);
+  btn?.classList.toggle('editing', editMode);
+  document.getElementById('navbar')?.classList.toggle('edit-pushed', editMode);
+  if (icon)  icon.className   = editMode ? 'fas fa-xmark' : 'fas fa-pen-to-square';
+  if (label) label.textContent = editMode ? 'Exit Edit' : 'Edit Mode';
+
+  if (editMode) {
+    document.querySelectorAll('.editable').forEach(el => {
+      el.setAttribute('contenteditable', 'true');
+      el.setAttribute('spellcheck', 'false');
+    });
+    // Profile photo click
+    const avatar = document.getElementById('about-avatar');
+    if (avatar) avatar.onclick = () => { if (editMode) document.getElementById('fileInputPhoto')?.click(); };
+    // Social links — click to set URL
+    document.querySelectorAll('.social-link').forEach(link => {
+      link.onclick = e => {
+        if (!editMode) return;
+        e.preventDefault(); e.stopPropagation();
+        openSocialModal(link.dataset.platform, link);
+      };
+    });
+    showToast('✏️ Edit Mode ON — text par click kar ke edit karein!');
+  } else {
+    document.querySelectorAll('.editable').forEach(el => el.removeAttribute('contenteditable'));
+    showToast('✅ View Mode — changes browser mein save hain!');
+  }
+}
+
+function openSocialModal(platform, el) {
+  currentSocialPlatform = platform;
+  const data = getSavedData();
+  const label = document.getElementById('socialModalLabel');
+  const input = document.getElementById('socialUrlInput');
+  if (label) label.textContent = (platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : 'Social') + ' link enter karein';
+  if (input) input.value = (data.socialLinks && data.socialLinks[platform]) || el?.getAttribute('href') || '';
+  document.getElementById('socialModal')?.classList.add('open');
+}
+
+function saveAll() {
+  const data = getSavedData();
+  data.text = data.text || {};
+  document.querySelectorAll('.editable[data-key]').forEach(el => {
+    data.text[el.dataset.key] = el.innerHTML;
+  });
+  const img = document.getElementById('profilePhoto');
+  if (img && img.style.display !== 'none' && img.src && img.src.startsWith('data:')) {
+    data.profilePhoto = img.src;
+  }
+  saveData(data);
+  showToast('💾 Tamam changes save ho gaye!');
+}
+
+function getSavedData() {
+  try { return JSON.parse(localStorage.getItem('portfolio_edit_data') || '{}'); } catch { return {}; }
+}
+function saveData(data) {
+  try {
+    localStorage.setItem('portfolio_edit_data', JSON.stringify(data));
+  } catch {
+    const slim = { text: data.text, socialLinks: data.socialLinks };
+    try { localStorage.setItem('portfolio_edit_data', JSON.stringify(slim)); } catch {}
+    showToast('⚠️ Image size zyada hai — text save ho gaya', 'error');
+  }
+}
+
+function loadSavedEdits() {
+  const data = getSavedData();
+  if (data.text) {
+    Object.entries(data.text).forEach(([key, val]) => {
+      const el = document.querySelector(`[data-key="${key}"]`);
+      if (el) el.innerHTML = val;
+    });
+  }
+  if (data.profilePhoto) {
+    const img = document.getElementById('profilePhoto');
+    const ph  = document.getElementById('avatarPlaceholder');
+    if (img) { img.src = data.profilePhoto; img.style.display = 'block'; }
+    if (ph)  ph.style.display = 'none';
+  }
+  if (data.socialLinks) {
+    Object.entries(data.socialLinks).forEach(([platform, url]) => {
+      document.querySelectorAll(`[data-platform="${platform}"]`).forEach(el => el.href = url);
+    });
+  }
+}
+
+function showToast(msg, type = 'success') {
+  const toast    = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  if (!toast || !toastMsg) return;
+  toastMsg.textContent = msg;
+  toast.style.borderColor = type === 'error' ? 'rgba(239,68,68,.4)' : 'rgba(16,185,129,.4)';
+  toast.style.color       = type === 'error' ? '#ef4444' : 'var(--green)';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+console.log('%c✏️ Edit Mode Loaded', 'color:#a855f7;font-size:1.1rem;font-weight:bold;');
+console.log('%cCtrl+E = Toggle Edit | Ctrl+S = Save', 'color:#06b6d4;');

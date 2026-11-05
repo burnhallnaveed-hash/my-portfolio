@@ -2,6 +2,66 @@
    ARCHITECTURE PORTFOLIO — NEON DARK THEME
    Inspired by Creative 3D Artist Style
    ========================================== */
+
+/* EDIT TOOLBAR */
+.edit-toolbar{position:fixed;top:0;left:0;right:0;z-index:8000;background:linear-gradient(135deg,rgba(124,58,237,.97),rgba(6,182,212,.97));backdrop-filter:blur(20px);padding:.65rem 2rem;transform:translateY(-100%);transition:transform .4s cubic-bezier(.4,0,.2,1);box-shadow:0 4px 30px rgba(124,58,237,.5)}
+.edit-toolbar.active{transform:translateY(0)}
+.edit-toolbar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.edit-brand{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:.95rem;color:#fff;white-space:nowrap}
+.edit-brand i{font-size:1.1rem}
+.edit-tools{display:flex;gap:.6rem;flex-wrap:wrap}
+.etool{padding:.4rem 1rem;border-radius:50px;font-size:.78rem;font-weight:600;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);transition:var(--transition);cursor:pointer;display:flex;align-items:center;gap:.4rem}
+.etool:hover{background:rgba(255,255,255,.3);transform:translateY(-1px)}
+.etool-save{background:rgba(16,185,129,.4);border-color:rgba(16,185,129,.6)}
+.etool-save:hover{background:rgba(16,185,129,.7)}
+.etool-reset{background:rgba(239,68,68,.3);border-color:rgba(239,68,68,.5)}
+.etool-reset:hover{background:rgba(239,68,68,.6)}
+.edit-hint{font-size:.72rem;color:rgba(255,255,255,.8);flex:1;min-width:200px}
+
+/* EDIT TOGGLE BUTTON */
+.edit-toggle-btn{position:fixed;bottom:5.5rem;right:2rem;z-index:7999;display:flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;background:var(--gradient-btn);color:#fff;font-size:.82rem;font-weight:700;border-radius:50px;box-shadow:0 6px 25px rgba(124,58,237,.6);transition:var(--transition);cursor:pointer;border:none}
+.edit-toggle-btn:hover{transform:translateY(-3px);box-shadow:0 10px 35px rgba(124,58,237,.8)}
+.edit-toggle-btn.editing{background:linear-gradient(135deg,#ef4444,#f97316)}
+
+/* EDITABLE ELEMENTS */
+body.edit-mode .editable{outline:2px dashed rgba(168,85,247,.6);border-radius:4px;cursor:text;min-width:20px;min-height:1em;transition:outline .2s,background .2s}
+body.edit-mode .editable:hover{outline:2px solid var(--accent2);background:rgba(168,85,247,.08)}
+body.edit-mode .editable:focus{outline:2px solid var(--accent3);background:rgba(6,182,212,.08)}
+.editable:focus{outline:none}
+
+/* UPLOADABLE */
+.uploadable{position:relative;cursor:pointer}
+.upload-overlay{position:absolute;inset:0;background:rgba(124,58,237,.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;color:#fff;font-weight:600;font-size:.9rem;border-radius:inherit;opacity:0;transition:opacity .3s;backdrop-filter:blur(4px);pointer-events:none}
+.upload-overlay i{font-size:1.8rem}
+body.edit-mode .uploadable:hover .upload-overlay{opacity:1}
+body.edit-mode .uploadable{outline:2px dashed rgba(168,85,247,.5);border-radius:20px}
+body.edit-mode .social-link{outline:2px dashed rgba(168,85,247,.5);border-radius:50%}
+body.edit-mode .social-link:hover{outline:2px solid var(--accent2)}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface);border:1px solid rgba(16,185,129,.4);border-radius:50px;padding:.7rem 1.5rem;display:flex;align-items:center;gap:.5rem;font-size:.85rem;font-weight:600;color:var(--green);box-shadow:0 10px 40px rgba(0,0,0,.5);z-index:30000;transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast i{font-size:1rem}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:var(--transition);padding:1rem}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:400px;box-shadow:0 30px 80px rgba(0,0,0,.6);transform:scale(.9) translateY(20px);transition:var(--transition);overflow:hidden}
+.modal-overlay.open .modal-box{transform:scale(1) translateY(0)}
+.modal-sm{max-width:400px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:1.5rem 1.5rem 1rem;border-bottom:1px solid var(--border)}
+.modal-header h3{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:.5rem;color:var(--text)}
+.modal-header h3 i{color:var(--accent2)}
+.modal-close{width:32px;height:32px;background:var(--surface2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:.9rem;transition:var(--transition);cursor:pointer;border:none}
+.modal-close:hover{background:rgba(239,68,68,.3);color:#fff}
+.modal-body{padding:1.5rem;display:flex;flex-direction:column;gap:1rem}
+.mfield{display:flex;flex-direction:column;gap:.4rem}
+.mfield label{font-size:.82rem;font-weight:600;color:var(--text-muted)}
+.mfield input,.mfield select{padding:.7rem .9rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);transition:var(--transition)}
+.mfield input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.15)}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.75rem;justify-content:flex-end}
+.btn-secondary{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.4rem;background:transparent;color:var(--text);font-weight:600;font-size:.88rem;border-radius:50px;border:1px solid var(--border);transition:var(--transition);cursor:pointer}
+.btn-secondary:hover{border-color:var(--accent2);background:rgba(124,58,237,.1)}
 :root {
   --bg: #0a0a0f; --bg2: #0d0d18; --bg3: #12121f;
   --surface: #161625; --surface2: #1e1e30;

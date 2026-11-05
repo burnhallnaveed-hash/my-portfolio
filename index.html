@@ -15,6 +15,30 @@
 </head>
 <body>
 
+<!-- EDIT TOOLBAR -->
+<div class="edit-toolbar" id="editToolbar">
+  <div class="edit-toolbar-inner">
+    <div class="edit-brand"><i class="fas fa-wand-magic-sparkles"></i><span>Edit Mode</span></div>
+    <div class="edit-tools">
+      <button class="etool etool-save" id="btnSave"><i class="fas fa-floppy-disk"></i> Save</button>
+      <button class="etool etool-reset" id="btnReset"><i class="fas fa-rotate-left"></i> Reset</button>
+    </div>
+    <div class="edit-hint"><i class="fas fa-circle-info"></i> Text par click karein = edit · <strong>Ctrl+E</strong> = Toggle · <strong>Ctrl+S</strong> = Save</div>
+  </div>
+</div>
+
+<!-- EDIT TOGGLE BUTTON -->
+<button class="edit-toggle-btn" id="editToggleBtn">
+  <i class="fas fa-pen-to-square" id="editIcon"></i>
+  <span id="editLabel">Edit Mode</span>
+</button>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg">Saved!</span></div>
+
+<!-- Hidden file input for profile photo -->
+<input type="file" id="fileInputPhoto" accept="image/*" style="display:none"/>
+
 <!-- LOADER -->
 <div class="loader" id="loader">
   <div class="loader-inner">
@@ -69,14 +93,14 @@
   <div class="hero-content">
     <div class="hero-badge">
       <span class="badge-dot"></span>
-      <span>Available for Freelance</span>
+      <span class="editable" data-key="heroBadge">Available for Freelance</span>
     </div>
     <h1 class="hero-title">
-      <span class="line">Architecture</span>
-      <span class="line gradient-text" id="hero-tagline">3D Visualization</span>
-      <span class="line">& Design</span>
+      <span class="line editable" data-key="heroLine1">Architecture</span>
+      <span class="line gradient-text editable" data-key="heroLine2" id="hero-tagline">3D Visualization</span>
+      <span class="line editable" data-key="heroLine3">& Design</span>
     </h1>
-    <p class="hero-desc" id="hero-desc">Transforming ideas into stunning 3D realities — from architectural masterpieces to mesmerizing animations and product designs.</p>
+    <p class="hero-desc editable" data-key="heroDesc" id="hero-desc">Transforming ideas into stunning 3D realities — from architectural masterpieces to mesmerizing animations and product designs.</p>
     <div class="hero-btns">
       <a href="#work" class="btn-primary"><span>View My Work</span><i class="fas fa-arrow-right"></i></a>
       <a href="#contact" class="btn-secondary"><span>Get In Touch</span></a>
@@ -129,11 +153,13 @@
       <div class="about-image-wrap" data-aos="fade-right">
         <div class="about-img-bg"></div>
         <div class="about-img-container">
-          <div class="about-avatar" id="about-avatar">
-            <div class="avatar-placeholder">
+          <div class="about-avatar uploadable" id="about-avatar" title="Click to upload profile photo">
+            <div class="avatar-placeholder" id="avatarPlaceholder">
               <i class="fas fa-user-tie"></i>
               <span id="av-initials">YN</span>
             </div>
+            <img id="profilePhoto" src="" alt="Profile" style="display:none;width:100%;height:100%;object-fit:cover;"/>
+            <div class="upload-overlay"><i class="fas fa-camera"></i><span>Photo Upload Karein</span></div>
           </div>
           <div class="about-badge-card">
             <i class="fas fa-award"></i>
@@ -151,23 +177,23 @@
       <div class="about-text" data-aos="fade-left">
         <div class="section-tag">About Me</div>
         <h2 class="section-title">
-          <span>Passionate About </span>
-          <span class="gradient-text" id="about-title">Design & Innovation</span>
+          <span class="editable" data-key="aboutTitle">Passionate About </span>
+          <span class="gradient-text editable" data-key="aboutTitleGrad" id="about-title">Design & Innovation</span>
         </h2>
-        <p class="about-desc" id="about-text">Loading...</p>
+        <p class="about-desc editable" data-key="aboutDesc" id="about-text">Architecture & 3D Visualization Studio</p>
         <div class="about-highlights">
-          <div class="highlight"><i class="fas fa-check-circle"></i><span>Architectural Visualization Expert</span></div>
-          <div class="highlight"><i class="fas fa-check-circle"></i><span>Blender 3D Animation & Modeling</span></div>
-          <div class="highlight"><i class="fas fa-check-circle"></i><span>Photorealistic D5 Renders</span></div>
-          <div class="highlight"><i class="fas fa-check-circle"></i><span>Product Design & Animation</span></div>
+          <div class="highlight"><i class="fas fa-check-circle"></i><span class="editable" data-key="hl1">Architectural Visualization Expert</span></div>
+          <div class="highlight"><i class="fas fa-check-circle"></i><span class="editable" data-key="hl2">Blender 3D Animation & Modeling</span></div>
+          <div class="highlight"><i class="fas fa-check-circle"></i><span class="editable" data-key="hl3">Photorealistic D5 Renders</span></div>
+          <div class="highlight"><i class="fas fa-check-circle"></i><span class="editable" data-key="hl4">Product Design & Animation</span></div>
         </div>
         <div class="about-actions">
           <a href="#contact" class="btn-primary"><i class="fas fa-envelope"></i><span>Contact Me</span></a>
           <div class="social-row">
-            <a href="#" class="social-icon"><i class="fab fa-behance"></i></a>
-            <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
-            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="social-icon social-link" data-platform="behance"><i class="fab fa-behance"></i></a>
+            <a href="#" class="social-icon social-link" data-platform="linkedin"><i class="fab fa-linkedin"></i></a>
+            <a href="#" class="social-icon social-link" data-platform="instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-icon social-link" data-platform="youtube"><i class="fab fa-youtube"></i></a>
           </div>
         </div>
       </div>
@@ -330,26 +356,26 @@
       <div class="contact-info" data-aos="fade-right">
         <div class="contact-item">
           <div class="contact-icon"><i class="fas fa-envelope"></i></div>
-          <div><strong>Email</strong><span id="cd-email">your.email@gmail.com</span></div>
+          <div><strong>Email</strong><span class="editable" data-key="cEmail" id="cd-email">your.email@gmail.com</span></div>
         </div>
-        <a href="#" id="cd-phone-link" class="contact-item" style="text-decoration:none;color:inherit;">
+        <div class="contact-item">
           <div class="contact-icon"><i class="fas fa-phone"></i></div>
-          <div><strong>WhatsApp</strong><span id="cd-phone">+92 300 0000000</span></div>
-        </a>
+          <div><strong>WhatsApp</strong><span class="editable" data-key="cPhone" id="cd-phone">+92 300 0000000</span></div>
+        </div>
         <div class="contact-item">
           <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
-          <div><strong>Location</strong><span>Pakistan</span></div>
+          <div><strong>Location</strong><span class="editable" data-key="cLocation">Pakistan</span></div>
         </div>
         <div class="contact-item">
           <div class="contact-icon"><i class="fas fa-clock"></i></div>
-          <div><strong>Availability</strong><span>Mon–Sat, 9am – 7pm PKT</span></div>
+          <div><strong>Availability</strong><span class="editable" data-key="cAvail">Mon–Sat, 9am – 7pm PKT</span></div>
         </div>
         <div class="contact-socials">
-          <a href="#" class="csocial"><i class="fab fa-whatsapp"></i></a>
-          <a href="#" class="csocial"><i class="fab fa-behance"></i></a>
-          <a href="#" class="csocial"><i class="fab fa-linkedin"></i></a>
-          <a href="#" class="csocial"><i class="fab fa-instagram"></i></a>
-          <a href="#" class="csocial"><i class="fab fa-youtube"></i></a>
+          <a href="#" class="csocial social-link" data-platform="whatsapp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" class="csocial social-link" data-platform="behance"><i class="fab fa-behance"></i></a>
+          <a href="#" class="csocial social-link" data-platform="linkedin"><i class="fab fa-linkedin"></i></a>
+          <a href="#" class="csocial social-link" data-platform="instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="csocial social-link" data-platform="youtube"><i class="fab fa-youtube"></i></a>
         </div>
       </div>
       <form class="contact-form" id="contact-form" data-aos="fade-left">
@@ -408,6 +434,15 @@
   <div class="lb-info">
     <h3 id="lb-title"></h3>
     <p id="lb-desc"></p>
+  </div>
+</div>
+
+<!-- SOCIAL LINK MODAL -->
+<div class="modal-overlay" id="socialModal">
+  <div class="modal-box modal-sm">
+    <div class="modal-header"><h3><i class="fas fa-link"></i> Social Link</h3><button class="modal-close" id="socialModalClose"><i class="fas fa-xmark"></i></button></div>
+    <div class="modal-body"><div class="mfield"><label id="socialModalLabel">Link</label><input type="url" id="socialUrlInput" placeholder="https://..."/></div></div>
+    <div class="modal-footer"><button class="btn-secondary" id="socialModalCancel">Cancel</button><button class="btn-primary" id="socialModalSave"><i class="fas fa-check"></i> Save</button></div>
   </div>
 </div>
 
