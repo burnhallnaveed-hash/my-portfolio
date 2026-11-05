@@ -14,6 +14,11 @@ let currentLBIndex  = 0;
 let visibleCount    = 12;
 const PAGE_SIZE     = 12;
 
+let editMode = false;
+let currentSocialPlatform = '';
+let currentSoftwareTags = ['Blender', 'Revit', 'D5 Render', 'Animation'];
+let authSuccessCallback = null;
+
 /* ============================================================
    LOADER
    ============================================================ */
@@ -198,18 +203,10 @@ function initSkillBars() {
    COUNTERS
    ============================================================ */
 function initCounters() {
-  const heroSection = document.getElementById('home');
-  let done = false;
-  const obs = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting && !done) {
-      done = true;
-      const totalProjects = portfolioData ? (portfolioData.projects || []).length : 20;
-      animateNum('stat-projects', totalProjects);
-      animateNum('stat-clients',  15);
-      animateNum('stat-years',    3);
-    }
-  }, { threshold: 0.3 });
-  if (heroSection) obs.observe(heroSection);
+  const totalProjects = portfolioData?.projects?.length || 7;
+  animateNum('stat-projects', Math.max(totalProjects, 7));
+  animateNum('stat-clients',  15);
+  animateNum('stat-years',    3);
 }
 
 function animateNum(id, target) {
@@ -539,37 +536,12 @@ function setFooterYear() {
   if (el) el.textContent = new Date().getFullYear();
 }
 
-/* ============================================================
-   INIT ALL
-   ============================================================ */
-function bootPortfolio() {
-  initLoader();
-  try { initParticles(); } catch(e){ console.warn(e); }
-  try { initNavbar(); } catch(e){ console.warn(e); }
-  try { initAOS(); } catch(e){ console.warn(e); }
-  try { initSkillBars(); } catch(e){ console.warn(e); }
-  try { initLightbox(); } catch(e){ console.warn(e); }
-  try { initContactForm(); } catch(e){ console.warn(e); }
-  try { setFooterYear(); } catch(e){ console.warn(e); }
-  loadPortfolio().catch(err => {
-    console.error('loadPortfolio error:', err);
-    showGalleryEmpty();
-  });
-  try { initEditMode(); } catch(e){ console.warn(e); }
-}
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootPortfolio);
-} else {
-  bootPortfolio();
-}
 
 /* ============================================================
    EDIT MODE SYSTEM
    ============================================================ */
-let editMode = false;
-let currentSocialPlatform = '';
-let currentSoftwareTags = ['Blender', 'Revit', 'D5 Render', 'Animation'];
+
 
 function initEditMode() {
   const btn = document.getElementById('editToggleBtn');
@@ -1027,3 +999,30 @@ function showToast(msg, type = 'success') {
 
 console.log('%c✏️ Edit Mode Loaded', 'color:#a855f7;font-size:1.1rem;font-weight:bold;');
 console.log('%cCtrl+E = Toggle Edit | Ctrl+S = Save', 'color:#06b6d4;');
+
+
+/* ============================================================
+   BOOT PORTFOLIO (EXECUTES AFTER ALL DEFINITIONS)
+   ============================================================ */
+function bootPortfolio() {
+  try { initLoader(); } catch(e) { console.warn(e); }
+  try { initCursor(); } catch(e) { console.warn(e); }
+  try { initParticles(); } catch(e) { console.warn(e); }
+  try { initNavbar(); } catch(e) { console.warn(e); }
+  try { initAOS(); } catch(e) { console.warn(e); }
+  try { initSkillBars(); } catch(e) { console.warn(e); }
+  try { initLightbox(); } catch(e) { console.warn(e); }
+  try { initContactForm(); } catch(e) { console.warn(e); }
+  try { setFooterYear(); } catch(e) { console.warn(e); }
+  try { initEditMode(); } catch(e) { console.warn(e); }
+  loadPortfolio().catch(err => {
+    console.error('loadPortfolio error:', err);
+    showGalleryEmpty();
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootPortfolio);
+} else {
+  bootPortfolio();
+}
