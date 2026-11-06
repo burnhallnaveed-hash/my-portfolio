@@ -5,7 +5,7 @@ Handles portfolio.json AND media files (GLB / MP4)
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json, subprocess, os, base64
 
-REPO      = r'C:\Users\OMEN\.gemini\antigravity\scratch\my-portfolio'
+REPO      = r'E:\my-portfolio'
 OWNER     = 'designcorner488'
 REPO_NAME = 'designcorner488.github.io'
 BRANCH    = 'master'
