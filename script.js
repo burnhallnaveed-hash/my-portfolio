@@ -561,9 +561,14 @@ function initContactForm() {
     }
 
     try {
-      // Direct AJAX delivery to Gmail inbox without opening mail client
+      // 4-second fast timeout controller
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+      // Direct AJAX delivery to Gmail inbox
       const res = await fetch(`https://formsubmit.co/ajax/${targetEmail}`, {
         method: 'POST',
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -578,6 +583,7 @@ function initContactForm() {
           _template: 'table'
         })
       });
+      clearTimeout(timeoutId);
 
       if (res.ok) {
         showToast('✅ Message aapki email (' + targetEmail + ') par bhej diya gaya hai!');
