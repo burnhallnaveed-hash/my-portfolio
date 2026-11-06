@@ -774,9 +774,7 @@ function toggleEditMode() {
       el.setAttribute('contenteditable', 'true');
       el.setAttribute('spellcheck', 'false');
     });
-    // Profile photo click
-    const avatar = document.getElementById('about-avatar');
-    if (avatar) avatar.onclick = () => { if (editMode) document.getElementById('fileInputPhoto')?.click(); };
+    // GLB viewer handled separately
     // Social links — click to set URL
     document.querySelectorAll('.social-link').forEach(link => {
       link.onclick = e => {
@@ -825,24 +823,8 @@ function renderOrbitTags() {
     }
     container.appendChild(span);
   });
-
-  // Always show '+ Add Software' pill in the circle
-  const addPill = document.createElement('span');
-  addPill.className = 'tag tag-add-pill';
-  addPill.style.top = '-8%';
-  addPill.style.left = '32%';
-  addPill.innerHTML = '<i class="fas fa-plus"></i> Add Software';
-  addPill.title = 'Click to add more softwares to this circle';
-  addPill.addEventListener('click', () => {
-    const isAuth = sessionStorage.getItem('cms_session_auth') === 'true';
-    if (isAuth) {
-      openSoftwareModal();
-    } else {
-      openEditAuthModal(() => openSoftwareModal());
-    }
-  });
-  container.appendChild(addPill);
 }
+// No inline floating pill — 'Manage Software Tags' button is below the orbit card
 
 function openSoftwareModal() {
   renderSoftwareModalList();
@@ -1069,6 +1051,166 @@ console.log('%c✏️ Edit Mode Loaded', 'color:#a855f7;font-size:1.1rem;font-we
 console.log('%cCtrl+E = Toggle Edit | Ctrl+S = Save', 'color:#06b6d4;');
 
 
+
+/* ============================================================
+   GLB 3D MODEL VIEWER SYSTEM — Scroll-driven, up to 30 models
+   ============================================================ */
+
+let glbModels = [];          // Array of {name, url, objectURL}
+let glbIndex  = 0;
+const GLB_MAX = 30;
+
+function initGLBViewer() {
+  const fileInput     = document.getElementById('glbFileInput');
+  const fileInputMore = document.getElementById('glbFileInputMore');
+  const prevBtn       = document.getElementById('glbPrevBtn');
+  const nextBtn       = document.getElementById('glbNextBtn');
+
+  if (fileInput)     fileInput.addEventListener('change',     e => handleGLBFiles(e.target.files));
+  if (fileInputMore) fileInputMore.addEventListener('change', e => handleGLBFiles(e.target.files));
+  if (prevBtn)       prevBtn.addEventListener('click', () => setGLBModel(glbIndex - 1));
+  if (nextBtn)       nextBtn.addEventListener('click', () => setGLBModel(glbIndex + 1));
+
+  // Click on add-more button (label)
+  const addLabel = document.getElementById('glbAddLabel');
+  if (addLabel) addLabel.addEventListener('click', e => e.stopPropagation());
+
+  // Scroll wheel inside viewer changes model
+  const wrap = document.getElementById('glbViewerWrap');
+  if (wrap) {
+    wrap.addEventListener('wheel', e => {
+      if (glbModels.length < 2) return;
+      e.preventDefault();
+      if (e.deltaY > 0) setGLBModel(glbIndex + 1);
+      else              setGLBModel(glbIndex - 1);
+    }, { passive: false });
+  }
+
+  // Touch swipe inside viewer
+  let touchStartY = 0;
+  if (wrap) {
+    wrap.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+    wrap.addEventListener('touchend',   e => {
+      const dy = touchStartY - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 40) {
+        if (dy > 0) setGLBModel(glbIndex + 1);
+        else        setGLBModel(glbIndex - 1);
+      }
+    });
+  }
+
+  // Load saved models from localStorage
+  loadSavedGLBModels();
+}
+
+function handleGLBFiles(files) {
+  if (!files || !files.length) return;
+  const remaining = GLB_MAX - glbModels.length;
+  const toLoad    = Math.min(files.length, remaining);
+  if (toLoad < files.length) {
+    showToast('⚠️ Max ' + GLB_MAX + ' models allowed!', 'error');
+  }
+  let loaded = 0;
+  for (let i = 0; i < toLoad; i++) {
+    const file = files[i];
+    if (!file.name.match(/\.(glb|gltf)$/i)) continue;
+    const url = URL.createObjectURL(file);
+    // Store as base64 for persistence
+    const reader = new FileReader();
+    reader.onload = ev => {
+      glbModels.push({ name: file.name.replace(/\.[^.]+$/, ''), url, b64: ev.target.result });
+      loaded++;
+      if (loaded === toLoad) {
+        saveGLBModels();
+        setGLBModel(glbIndex === 0 ? 0 : glbModels.length - 1);
+        showUI();
+        showToast('🎉 ' + toLoad + ' model(s) load ho gaye!');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function showUI() {
+  const placeholder = document.getElementById('glbPlaceholder');
+  const container   = document.getElementById('glbViewerContainer');
+  const addLabel    = document.getElementById('glbAddLabel');
+  if (placeholder) placeholder.style.display = 'none';
+  if (container)   container.style.display   = 'block';
+  if (addLabel && glbModels.length < GLB_MAX) addLabel.style.display = 'inline-flex';
+  renderGLBDots();
+}
+
+function setGLBModel(idx) {
+  if (!glbModels.length) return;
+  glbIndex = ((idx % glbModels.length) + glbModels.length) % glbModels.length;
+  const mv = document.getElementById('mainModelViewer');
+  if (mv) {
+    mv.setAttribute('src', glbModels[glbIndex].url || glbModels[glbIndex].b64);
+    // Trigger auto-rotate restart
+    mv.removeAttribute('auto-rotate');
+    setTimeout(() => mv.setAttribute('auto-rotate', ''), 100);
+  }
+  const counter = document.getElementById('glbCounter');
+  const name    = document.getElementById('glbModelName');
+  if (counter) counter.textContent = (glbIndex + 1) + ' / ' + glbModels.length;
+  if (name)    name.textContent    = glbModels[glbIndex].name;
+  const prevBtn = document.getElementById('glbPrevBtn');
+  const nextBtn = document.getElementById('glbNextBtn');
+  if (prevBtn) prevBtn.disabled = glbModels.length <= 1;
+  if (nextBtn) nextBtn.disabled = glbModels.length <= 1;
+  renderGLBDots();
+}
+
+function renderGLBDots() {
+  let dotsWrap = document.getElementById('glbDots');
+  if (!dotsWrap) {
+    dotsWrap = document.createElement('div');
+    dotsWrap.className = 'glb-dots';
+    dotsWrap.id = 'glbDots';
+    const wrap = document.getElementById('glbViewerWrap');
+    if (wrap) wrap.appendChild(dotsWrap);
+  }
+  dotsWrap.innerHTML = '';
+  if (glbModels.length <= 1) return;
+  glbModels.forEach((m, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'glb-dot' + (i === glbIndex ? ' active' : '');
+    dot.title = m.name;
+    dot.addEventListener('click', () => setGLBModel(i));
+    dotsWrap.appendChild(dot);
+  });
+}
+
+function saveGLBModels() {
+  try {
+    // Only save name + b64 (url is object URL, not persistent)
+    const toSave = glbModels.map(m => ({ name: m.name, b64: m.b64 }));
+    localStorage.setItem('glb_models', JSON.stringify(toSave));
+  } catch(e) {
+    showToast('⚠️ Models save nahi hue (storage full)', 'error');
+  }
+}
+
+function loadSavedGLBModels() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('glb_models') || '[]');
+    if (!saved.length) return;
+    glbModels = saved.map(m => ({
+      name: m.name,
+      b64:  m.b64,
+      url:  m.b64   // use b64 as URL since object URLs don't persist
+    }));
+    showUI();
+    setGLBModel(0);
+  } catch(e) {
+    console.warn('GLB load error:', e);
+  }
+}
+
+// Expose to window
+window.initGLBViewer = initGLBViewer;
+
 /* ============================================================
    BOOT PORTFOLIO (EXECUTES AFTER ALL DEFINITIONS)
    ============================================================ */
@@ -1083,6 +1225,7 @@ function bootPortfolio() {
   try { initContactForm(); } catch(e) { console.warn(e); }
   try { setFooterYear(); } catch(e) { console.warn(e); }
   try { initEditMode(); } catch(e) { console.warn(e); }
+  try { initGLBViewer(); } catch(e) { console.warn(e); }
   loadPortfolio().catch(err => {
     console.error('loadPortfolio error:', err);
     showGalleryEmpty();

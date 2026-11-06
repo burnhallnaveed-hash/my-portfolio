@@ -16,7 +16,8 @@ window.addEventListener('error', function(e) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="style.css?v=11.0"/>
+  <link rel="stylesheet" href="style.css?v=12.0"/>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 </head>
 <body>
 
@@ -149,12 +150,11 @@ window.addEventListener('error', function(e) {
         <span class="tag t2">Revit</span>
         <span class="tag t3">D5 Render</span>
         <span class="tag t4">Animation</span>
-        <span class="tag tag-add-pill" id="orbitPillTag" onclick="triggerAddSoftware()" style="top:-8%;left:32%;"><i class="fas fa-plus"></i> Add Software</span>
       </div>
     </div>
-    <div class="orbit-actions-bar" style="margin-top:1.5rem;text-align:center;position:relative;z-index:25;">
+    <div class="orbit-actions-bar">
       <button type="button" class="btn-orbit-add-pill" id="orbitAddBtn" onclick="triggerAddSoftware()">
-        <i class="fas fa-plus-circle"></i> Add Software Tag
+        <i class="fas fa-plus-circle"></i> Manage Software Tags
       </button>
     </div>
   </div>
@@ -171,13 +171,44 @@ window.addEventListener('error', function(e) {
       <div class="about-image-wrap" data-aos="fade-right">
         <div class="about-img-bg"></div>
         <div class="about-img-container">
-          <div class="about-avatar uploadable" id="about-avatar" title="Click to upload profile photo">
-            <div class="avatar-placeholder" id="avatarPlaceholder">
-              <i class="fas fa-user-tie"></i>
-              <span id="av-initials">YN</span>
+          <!-- 3D GLB MODEL VIEWER -->
+          <div class="glb-viewer-wrap" id="glbViewerWrap">
+            <div class="glb-placeholder" id="glbPlaceholder">
+              <i class="fas fa-cube"></i>
+              <span>3D Model Upload Karein</span>
+              <p class="glb-hint">GLB / GLTF files support<br>Auto-animate hoga!</p>
+              <label class="glb-upload-btn" id="glbUploadLabel">
+                <i class="fas fa-upload"></i> Upload 3D Model
+                <input type="file" id="glbFileInput" accept=".glb,.gltf" multiple style="display:none"/>
+              </label>
             </div>
-            <img id="profilePhoto" src="" alt="Profile" style="display:none;width:100%;height:100%;object-fit:cover;"/>
-            <div class="upload-overlay"><i class="fas fa-camera"></i><span>Photo Upload Karein</span></div>
+            <div class="glb-viewer-container" id="glbViewerContainer" style="display:none">
+              <model-viewer
+                id="mainModelViewer"
+                auto-rotate
+                auto-rotate-delay="0"
+                rotation-per-second="30deg"
+                camera-controls
+                touch-action="pan-y"
+                shadow-intensity="1"
+                environment-image="neutral"
+                exposure="1"
+                style="width:100%;height:100%;background:transparent"
+              ></model-viewer>
+              <div class="glb-nav-overlay">
+                <button class="glb-nav-btn glb-prev" id="glbPrevBtn" title="Previous"><i class="fas fa-chevron-left"></i></button>
+                <div class="glb-info">
+                  <span class="glb-counter" id="glbCounter">1 / 1</span>
+                  <span class="glb-name" id="glbModelName">Model</span>
+                </div>
+                <button class="glb-nav-btn glb-next" id="glbNextBtn" title="Next"><i class="fas fa-chevron-right"></i></button>
+              </div>
+              <div class="glb-scroll-hint"><i class="fas fa-arrows-up-down"></i> Scroll to change model</div>
+            </div>
+            <label class="glb-add-more-btn" id="glbAddLabel" style="display:none" title="Add more 3D Models">
+              <i class="fas fa-plus-circle"></i> Add More Models
+              <input type="file" id="glbFileInputMore" accept=".glb,.gltf" multiple style="display:none"/>
+            </label>
           </div>
           <div class="about-badge-card">
             <i class="fas fa-award"></i>
@@ -527,6 +558,6 @@ window.addEventListener('error', function(e) {
   </div>
 </div>
 
-<script src="script.js?v=11.0"></script>
+<script src="script.js?v=12.0"></script>
 </body>
 </html>
