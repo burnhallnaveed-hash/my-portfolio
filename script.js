@@ -257,26 +257,32 @@ async function loadPortfolio() {
    ============================================================ */
 function applySettings(s) {
   if (!s) return;
-  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+  const saved = getSavedData()?.text || {};
+  const set = (id, val, key) => {
+    if (key && saved[key]) return; // Respect custom edits!
+    const el = document.getElementById(id);
+    if (el && val) el.textContent = val;
+  };
   const setHref = (id, val) => { const el = document.getElementById(id); if (el && val) el.href = val; };
 
-  set('nav-name',    s.name || 'STUDIO');
-  set('footer-name', s.name || 'YOUR NAME');
+  set('nav-name',    s.name || 'STUDIO', 'navName');
+  set('footer-name', s.name || 'YOUR NAME', 'footerName');
   set('footer-year', new Date().getFullYear());
-  set('hero-tagline', s.tagline ? s.tagline.split(' ').slice(0,2).join(' ') : '3D Visualization');
-  set('hero-desc',    s.about ? s.about.split('.')[0] + '.' : '');
-  set('about-title',  s.name || 'The Studio');
-  set('about-text',   s.about || '');
+  set('hero-tagline', s.tagline ? s.tagline.split(' ').slice(0,2).join(' ') : '3D Visualization', 'heroLine2');
+  set('hero-desc',    s.about ? s.about.split('.')[0] + '.' : '', 'heroDesc');
+  set('about-title',  s.name || 'The Studio', 'aboutTitleGrad');
+  set('about-text',   s.about || '', 'aboutDesc');
   set('av-initials',  getInitials(s.name || 'YN'));
-  set('av-title',     s.title || 'Architecture & 3D');
-  set('cd-email',     s.email || '');
-  set('cd-phone',     s.phone || '');
+  set('av-title',     s.title || 'Architecture & 3D', 'aboutBadgeTitle');
+  set('cd-email',     s.email || '', 'cEmail');
+  set('cd-phone',     s.phone || '', 'cPhone');
   if (s.email) setHref('cd-email-link', 'mailto:' + s.email);
   if (s.phone) setHref('cd-phone-link', 'tel:' + s.phone.replace(/\s/g, ''));
   if (s.softwareTags && Array.isArray(s.softwareTags) && s.softwareTags.length) {
     currentSoftwareTags = s.softwareTags;
     renderOrbitTags();
   }
+  loadSavedEdits();
 }
 
 function getInitials(name) {
@@ -514,6 +520,31 @@ function renderLBContent(list) {
 function initContactForm() {
   const form = document.getElementById('contact-form');
   if (!form) return;
+
+  // Direct WhatsApp Button
+  const waBtn = document.getElementById('btnSendWhatsApp');
+  if (waBtn) {
+    waBtn.addEventListener('click', () => {
+      const name    = document.getElementById('cf-name')?.value.trim();
+      const email   = document.getElementById('cf-email')?.value.trim();
+      const service = document.getElementById('cf-service')?.value;
+      const msg     = document.getElementById('cf-message')?.value.trim();
+
+      const phoneText = document.getElementById('cd-phone')?.textContent || '+923392332272';
+      const cleanPhone = phoneText.replace(/[^0-9]/g, '');
+
+      let waMsg = `*New Portfolio Inquiry*\n`;
+      if (name)    waMsg += `👤 *Name:* ${name}\n`;
+      if (email)   waMsg += `📧 *Email:* ${email}\n`;
+      if (service) waMsg += `🛠️ *Service:* ${service}\n`;
+      if (msg)     waMsg += `💬 *Message:* ${msg}`;
+
+      window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMsg)}`, '_blank');
+      showToast('📲 WhatsApp chat khul rahi hai...');
+    });
+  }
+
+  // Direct Email Send
   form.addEventListener('submit', e => {
     e.preventDefault();
     const name    = document.getElementById('cf-name')?.value.trim();
@@ -524,7 +555,7 @@ function initContactForm() {
 
     const subject = `Portfolio Inquiry — ${service || 'General'} from ${name}`;
     const body    = `Name: ${name}\nEmail: ${email}\nService: ${service || 'Not specified'}\n\nMessage:\n${msg}`;
-    const em      = document.getElementById('cd-email')?.textContent || '';
+    const em      = document.getElementById('cd-email')?.textContent || 'designcorner488@gmail.com';
     window.location.href = `mailto:${em}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     const success = document.getElementById('formSuccess');
@@ -1285,18 +1316,134 @@ const DEFAULT_SAMPLE_MODEL = {
   url: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb'
 };
 
+
+async function dbSaveAllOrdered(items) {
+  try {
+    const db = await openMediaDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      const store = tx.objectStore(IDB_STORE);
+      store.clear();
+      items.forEach((it, idx) => {
+        if (it.id === 'sample-default') return;
+        store.add({
+          name: it.name,
+          type: it.type,
+          blob: it.rawBlob || it.blob,
+          orderIndex: idx
+        });
+      });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch(e) { console.warn('IDB Save Ordered error:', e); }
+}
+
+async function setAsFirstMedia() {
+  if (!mediaList.length || mediaIndex === 0) return;
+  const item = mediaList.splice(mediaIndex, 1)[0];
+  mediaList.unshift(item);
+  await dbSaveAllOrdered(mediaList);
+  showToast(`⭐ "${item.name}" No. 1 Display set ho gaya!`);
+  setMediaIndex(0);
+}
+
+function openReorderModal() {
+  const modal = document.getElementById('glbReorderModal');
+  if (!modal) return;
+  renderReorderList();
+  modal.style.display = 'flex';
+  modal.style.opacity = '1';
+  modal.style.visibility = 'visible';
+  modal.classList.add('open');
+}
+
+function closeReorderModal() {
+  const modal = document.getElementById('glbReorderModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.style.opacity = '0';
+    modal.style.visibility = 'hidden';
+    modal.classList.remove('open');
+  }
+}
+
+window.openReorderModal = openReorderModal;
+window.closeReorderModal = closeReorderModal;
+
+function renderReorderList() {
+  const list = document.getElementById('reorderList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  if (!mediaList.length) {
+    list.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:1rem;">Koi uploaded model nahi hai.</p>';
+    return;
+  }
+
+  mediaList.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = `reorder-item${idx === 0 ? ' first-item' : ''}${idx === mediaIndex ? ' active-item' : ''}`;
+
+    const iconClass = item.type === 'video' ? 'fas fa-video' : 'fas fa-cube';
+    const badgeText = idx === 0 ? '★ 1' : `#${idx + 1}`;
+
+    row.innerHTML = `
+      <span class="reorder-badge">${badgeText}</span>
+      <div class="reorder-info">
+        <i class="${iconClass}"></i>
+        <span class="reorder-name">${item.name || 'Asset'} ${idx === 0 ? '<strong style="color:var(--gold);font-size:0.75rem;">(Main Display)</strong>' : ''}</span>
+      </div>
+      <div class="reorder-btns">
+        <button type="button" class="reorder-btn" title="Move Up" ${idx === 0 ? 'disabled' : ''} onclick="moveMediaPosition(${idx}, ${idx - 1})"><i class="fas fa-arrow-up"></i></button>
+        <button type="button" class="reorder-btn" title="Move Down" ${idx === mediaList.length - 1 ? 'disabled' : ''} onclick="moveMediaPosition(${idx}, ${idx + 1})"><i class="fas fa-arrow-down"></i></button>
+        <button type="button" class="reorder-btn star-btn" title="Set as #1 First" ${idx === 0 ? 'disabled' : ''} onclick="moveMediaToTop(${idx})"><i class="fas fa-star"></i></button>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+async function moveMediaPosition(fromIdx, toIdx) {
+  if (toIdx < 0 || toIdx >= mediaList.length) return;
+  const item = mediaList.splice(fromIdx, 1)[0];
+  mediaList.splice(toIdx, 0, item);
+  await dbSaveAllOrdered(mediaList);
+  renderReorderList();
+  renderMediaDots();
+  setMediaIndex(toIdx);
+}
+
+async function moveMediaToTop(fromIdx) {
+  if (fromIdx <= 0 || fromIdx >= mediaList.length) return;
+  const item = mediaList.splice(fromIdx, 1)[0];
+  mediaList.unshift(item);
+  await dbSaveAllOrdered(mediaList);
+  renderReorderList();
+  renderMediaDots();
+  setMediaIndex(0);
+}
+
+window.moveMediaPosition = moveMediaPosition;
+window.moveMediaToTop = moveMediaToTop;
+
+
 async function initGLBViewer() {
   const fileInput     = document.getElementById('glbFileInput');
   const fileInputMore = document.getElementById('glbFileInputMore');
   const prevBtn       = document.getElementById('glbPrevBtn');
   const nextBtn       = document.getElementById('glbNextBtn');
   const delBtn        = document.getElementById('glbDelBtn');
+  const setFirstBtn   = document.getElementById('glbSetFirstBtn');
+  const reorderBtn    = document.getElementById('glbReorderBtn');
 
   if (fileInput)     fileInput.addEventListener('change',     e => handleUploadFiles(e.target.files));
   if (fileInputMore) fileInputMore.addEventListener('change', e => handleUploadFiles(e.target.files));
   if (prevBtn)       prevBtn.addEventListener('click', () => setMediaIndex(mediaIndex - 1));
   if (nextBtn)       nextBtn.addEventListener('click', () => setMediaIndex(mediaIndex + 1));
   if (delBtn)        delBtn.addEventListener('click', deleteCurrentMedia);
+  if (setFirstBtn)   setFirstBtn.addEventListener('click', setAsFirstMedia);
+  if (reorderBtn)    reorderBtn.addEventListener('click', openReorderModal);
 
   // Mouse wheel scroll to switch models/animations
   const wrap = document.getElementById('glbViewerWrap');
@@ -1347,7 +1494,8 @@ async function handleUploadFiles(files) {
     const item = {
       name: file.name.replace(/\.[^.]+$/, ''),
       type: isModel ? 'glb' : 'video',
-      blob: file
+      blob: file,
+      rawBlob: file
     };
 
     await dbSaveItem(item);
@@ -1370,7 +1518,8 @@ async function loadSavedMedia() {
       id: item.id,
       name: item.name,
       type: item.type,
-      url: URL.createObjectURL(item.blob)
+      url: URL.createObjectURL(item.blob),
+      rawBlob: item.blob
     });
   });
 

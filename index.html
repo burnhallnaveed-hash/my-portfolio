@@ -16,7 +16,7 @@ window.addEventListener('error', function(e) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="style.css?v=14.0"/>
+  <link rel="stylesheet" href="style.css?v=15.0"/>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 </head>
 <body>
@@ -220,8 +220,10 @@ window.addEventListener('error', function(e) {
                   <span class="glb-counter" id="glbCounter">1 / 1</span>
                   <span class="glb-name" id="glbModelName">Model</span>
                 </div>
-                <div style="display:flex;align-items:center;gap:.4rem;">
-                  <button class="glb-del-btn" id="glbDelBtn" title="Delete Model / Animation"><i class="fas fa-trash-can"></i></button>
+                <div class="glb-edit-actions" style="display:flex;align-items:center;gap:.35rem;">
+                  <button type="button" class="glb-action-btn glb-set-first-btn" id="glbSetFirstBtn" title="Set this model as #1 (Cover/Main Display)"><i class="fas fa-star"></i> Set #1</button>
+                  <button type="button" class="glb-action-btn" id="glbReorderBtn" title="Arrange & Reorder All Models"><i class="fas fa-arrow-down-up-across-line"></i> Reorder</button>
+                  <button type="button" class="glb-del-btn" id="glbDelBtn" title="Delete Model / Animation"><i class="fas fa-trash-can"></i></button>
                   <button class="glb-nav-btn glb-next" id="glbNextBtn" title="Next"><i class="fas fa-chevron-right"></i></button>
                 </div>
               </div>
@@ -467,7 +469,15 @@ window.addEventListener('error', function(e) {
           </select>
         </div>
         <div class="form-group"><label>Message</label><textarea id="cf-message" rows="5" placeholder="Tell me about your project..." required></textarea></div>
-        <button type="submit" class="btn-primary full-width"><span>Send Message</span><i class="fas fa-paper-plane"></i></button>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          <button type="submit" class="btn-primary full-width" id="btnSendEmail">
+            <span>Send Message via Email</span><i class="fas fa-paper-plane"></i>
+          </button>
+          <button type="button" class="btn-secondary full-width" id="btnSendWhatsApp" style="border-color:rgba(16,185,129,.5);color:#10b981;justify-content:center;">
+            <i class="fab fa-whatsapp" style="font-size:1.15rem;margin-right:0.4rem;"></i>
+            <span>Direct Chat on WhatsApp</span>
+          </button>
+        </div>
         <div class="form-success" id="formSuccess"><i class="fas fa-check-circle"></i> Message sent successfully!</div>
       </form>
     </div>
@@ -580,6 +590,27 @@ window.addEventListener('error', function(e) {
   </div>
 </div>
 
-<script src="script.js?v=14.0"></script>
+<script src="script.js?v=15.0"></script>
+<!-- REORDER MODELS & ANIMATIONS MODAL -->
+<div class="modal-overlay" id="glbReorderModal">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-arrow-down-up-across-line"></i> Arrange Models & Animations Order</h3>
+      <button type="button" class="modal-close" onclick="closeReorderModal()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.6rem;">
+        Models ki tartib set karein. <strong>No. 1 position</strong> wala model sab se pehle website par live nazar aayega:
+      </p>
+      <div id="reorderList" style="display:flex;flex-direction:column;gap:0.5rem;max-height:280px;overflow-y:auto;padding-right:4px;">
+        <!-- Dynamic reorder list -->
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-primary" onclick="closeReorderModal()"><i class="fas fa-check"></i> Done & Apply</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
