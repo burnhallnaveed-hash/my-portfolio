@@ -598,12 +598,13 @@ function initContactForm() {
         throw new Error('Server returned non-200');
       }
     } catch(err) {
-      console.warn('Direct delivery fallback to mailto:', err);
+      console.warn('formsubmit.co failed — opening Gmail Web Compose:', err);
       // Fallback: mailto
       const subject = `Portfolio Inquiry — ${service || 'General'} from ${name}`;
       const body = `Name: ${name}\nEmail: ${email}\nService: ${service || 'Not specified'}\n\nMessage:\n${msg}`;
-      window.location.href = `mailto:${targetEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      showToast('✉️ Email app open ho rahi hai...');
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(targetEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(gmailUrl, '_blank');
+      showToast('📧 Gmail khul raha hai — message pehle se bhara hua hai, bas Send dabayein!');
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
