@@ -539,7 +539,7 @@ function initContactForm() {
       if (service) waMsg += `🛠️ *Service:* ${service}\n`;
       if (msg)     waMsg += `💬 *Message:* ${msg}`;
 
-      window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMsg)}`, '_blank');
+      window.open(`https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(waMsg)}`, '_blank');
       showToast('📲 WhatsApp chat khul rahi hai...');
     });
   }
@@ -860,7 +860,7 @@ function initEditMode() {
       let clean = inputVal.replace(/[^0-9]/g, '');
       if (clean.startsWith('03')) clean = '92' + clean.slice(1);
       if (!inputVal.startsWith('http')) {
-        finalUrl = `https://wa.me/${clean}`;
+        finalUrl = `https://web.whatsapp.com/send?phone=${clean}`;
       }
     } else if (currentSocialPlatform === 'instagram') {
       if (!inputVal.startsWith('http')) {
@@ -1306,7 +1306,7 @@ function loadSavedEdits() {
   } else {
     // Default fallback for WhatsApp
     document.querySelectorAll('[data-platform="whatsapp"]').forEach(el => {
-      el.href = 'https://wa.me/923392332272';
+      el.href = 'https://web.whatsapp.com/send?phone=923392332272';
       el.target = '_blank';
       el.rel = 'noopener noreferrer';
     });
