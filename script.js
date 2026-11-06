@@ -21,115 +21,74 @@ let authSuccessCallback = null;
 
 
 /* ============================================================
-   PUBLISH TO GITHUB
+   PUBLISH TO GITHUB — via local Publish Server (no token needed)
+   Desktop par "Publish Website.bat" chalayein, phir button dabayein.
    ============================================================ */
-function openGhTokenModal() {
-  const existing = localStorage.getItem('cms_gh_token') || '';
-  document.getElementById('ghTokenInput').value = existing;
-  document.getElementById('ghTokenModal').style.display = 'flex';
-  setTimeout(() => document.getElementById('ghTokenInput').focus(), 100);
-}
+const PUBLISH_SERVER = 'http://localhost:7788';
+
 function closeGhTokenModal() {
-  document.getElementById('ghTokenModal').style.display = 'none';
+  const m = document.getElementById('ghTokenModal');
+  if (m) m.style.display = 'none';
 }
-function saveGhToken() {
-  const t = document.getElementById('ghTokenInput').value.trim();
-  if (!t) { showToast('Token enter karein!', 'error'); return; }
-  localStorage.setItem('cms_gh_token', t);
-  closeGhTokenModal();
-  showToast('✅ Token save ho gaya! Ab Publish karein.');
-}
-function removeGhToken() {
-  localStorage.removeItem('cms_gh_token');
-  document.getElementById('ghTokenInput').value = '';
-  showToast('🗑️ Token remove ho gaya.');
+
+function buildPublishPayload() {
+  const updatedJson = JSON.parse(JSON.stringify(portfolioData || {}));
+  updatedJson.settings = updatedJson.settings || {};
+  const heroLine2  = document.querySelector('[data-key="heroLine2"]')?.textContent?.trim();
+  const heroDesc   = document.querySelector('[data-key="heroDesc"]')?.textContent?.trim();
+  const aboutText  = document.querySelector('[data-key="aboutText"]')?.textContent?.trim();
+  const aboutTitle = document.querySelector('[data-key="aboutTitle"]')?.textContent?.trim();
+  const contactEm  = document.querySelector('[data-key="contactEmail"]')?.textContent?.trim();
+  const contactPh  = document.querySelector('[data-key="contactPhone"]')?.textContent?.trim();
+  if (aboutTitle) updatedJson.settings.name    = aboutTitle;
+  if (heroLine2)  updatedJson.settings.tagline = heroLine2;
+  if (heroDesc)   updatedJson.settings.title   = heroDesc;
+  if (aboutText)  updatedJson.settings.about   = aboutText;
+  if (contactEm)  updatedJson.settings.email   = contactEm;
+  if (contactPh)  updatedJson.settings.phone   = contactPh;
+  if (currentSoftwareTags && currentSoftwareTags.length)
+    updatedJson.settings.softwareTags = currentSoftwareTags;
+  const saved = getSavedData();
+  if (saved.text) updatedJson._textOverrides = saved.text;
+  return updatedJson;
 }
 
 async function publishToGitHub() {
-  const token = localStorage.getItem('cms_gh_token');
-  if (!token) {
-    openGhTokenModal();
-    return;
-  }
-
   const btn = document.getElementById('btnPublish');
   if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing...'; }
-  showToast('☁️ GitHub par publish ho raha hai...', 'success');
 
+  const payload = buildPublishPayload();
+
+  // --- Primary: Local Publish Server ---
   try {
-    // Gather current text edits from DOM
-    const data = getSavedData();
-    const updatedJson = JSON.parse(JSON.stringify(portfolioData || {}));
-    updatedJson.settings = updatedJson.settings || {};
+    const ctrl = new AbortController();
+    const tid  = setTimeout(() => ctrl.abort(), 2000);
+    const ping = await fetch(PUBLISH_SERVER + '/ping', { signal: ctrl.signal }).catch(() => null);
+    clearTimeout(tid);
 
-    const heroLine2 = document.querySelector('[data-key="heroLine2"]')?.textContent?.trim();
-    const heroDesc  = document.querySelector('[data-key="heroDesc"]')?.textContent?.trim();
-    const aboutText = document.querySelector('[data-key="aboutText"]')?.textContent?.trim();
-    const aboutTitle= document.querySelector('[data-key="aboutTitle"]')?.textContent?.trim();
-    const contactEm = document.querySelector('[data-key="contactEmail"]')?.textContent?.trim();
-    const contactPh = document.querySelector('[data-key="contactPhone"]')?.textContent?.trim();
-
-    if (aboutTitle) updatedJson.settings.name    = aboutTitle;
-    if (heroLine2)  updatedJson.settings.tagline = heroLine2;
-    if (heroDesc)   updatedJson.settings.title   = heroDesc;
-    if (aboutText)  updatedJson.settings.about   = aboutText;
-    if (contactEm)  updatedJson.settings.email   = contactEm;
-    if (contactPh)  updatedJson.settings.phone   = contactPh;
-    if (currentSoftwareTags?.length) updatedJson.settings.softwareTags = currentSoftwareTags;
-
-    // Also persist localStorage text overrides into json
-    if (data.text) {
-      updatedJson._textOverrides = data.text;
-    }
-
-    // Get current SHA of portfolio.json
-    const fileRes = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/portfolio.json`,
-      { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
-    );
-    let sha = null;
-    if (fileRes.ok) { sha = (await fileRes.json()).sha; }
-    else if (fileRes.status === 401 || fileRes.status === 403) {
-      showToast('❌ Token invalid ya expired! Settings mein update karein.', 'error');
-      openGhTokenModal();
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publish Live'; }
-      return;
-    }
-
-    const jsonString = JSON.stringify(updatedJson, null, 2);
-    const base64Json = btoa(unescape(encodeURIComponent(jsonString)));
-
-    const putRes = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/portfolio.json`,
-      {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: '🚀 Portfolio update from website (Publish button)',
-          content: base64Json,
-          sha: sha,
-          branch: BRANCH
-        })
+    if (ping && ping.ok) {
+      showToast('\u2601\uFE0F Publish ho raha hai...', 'success');
+      const res = await fetch(PUBLISH_SERVER + '/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if (json.ok) {
+        showToast('\uD83D\uDE80 Published! Clients ko 1-2 min mein update nazar aayega!');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publish Live'; }
+        return;
       }
-    );
-
-    if (putRes.ok) {
-      showToast('🚀 Published! Clients ko 1-2 min mein naya version nazar aayega!');
-    } else {
-      const errJson = await putRes.json().catch(() => ({}));
-      console.error('Publish failed:', putRes.status, errJson);
-      showToast('❌ Publish fail hua. Token check karein ya dobara koshish karein.', 'error');
+      throw new Error(json.message || 'Server error');
     }
   } catch (e) {
-    console.error('publishToGitHub error:', e);
-    showToast('❌ Network error. Internet connection check karein.', 'error');
-  } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publish Live'; }
+    console.warn('Publish server not reachable:', e.message || e);
   }
+
+  // --- Server not running: show instructions ---
+  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publish Live'; }
+  const modal = document.getElementById('ghTokenModal');
+  if (modal) modal.style.display = 'flex';
 }
 
 /* ============================================================
