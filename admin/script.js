@@ -4,8 +4,8 @@
    and commit directly to GitHub repository.
    ======================================================== */
 
-const REPO_OWNER = 'burnhallnaveed-hash';
-const REPO_NAME  = 'my-portfolio';
+const REPO_OWNER = 'designcorner488';
+const REPO_NAME  = 'designcorner488.github.io';
 const BRANCH     = 'master';
 const DATA_FILE  = 'portfolio.json';
 
