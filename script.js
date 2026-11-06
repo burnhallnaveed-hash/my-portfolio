@@ -747,15 +747,48 @@ function initEditMode() {
     if (e.target === document.getElementById('socialModal')) document.getElementById('socialModal').classList.remove('open');
   });
   document.getElementById('socialModalSave')?.addEventListener('click', () => {
-    const url = document.getElementById('socialUrlInput')?.value.trim();
-    if (!url) return;
-    document.querySelectorAll(`[data-platform="${currentSocialPlatform}"]`).forEach(el => el.href = url);
+    let inputVal = document.getElementById('socialUrlInput')?.value.trim();
+    if (!inputVal) return;
+
+    let finalUrl = inputVal;
+    if (currentSocialPlatform === 'whatsapp') {
+      let clean = inputVal.replace(/[^0-9]/g, '');
+      if (clean.startsWith('03')) clean = '92' + clean.slice(1);
+      if (!inputVal.startsWith('http')) {
+        finalUrl = `https://wa.me/${clean}`;
+      }
+    } else if (currentSocialPlatform === 'instagram') {
+      if (!inputVal.startsWith('http')) {
+        const username = inputVal.replace(/^@/, '');
+        finalUrl = `https://instagram.com/${username}`;
+      }
+    } else if (currentSocialPlatform === 'behance') {
+      if (!inputVal.startsWith('http')) {
+        finalUrl = `https://behance.net/${inputVal}`;
+      }
+    } else if (currentSocialPlatform === 'linkedin') {
+      if (!inputVal.startsWith('http')) {
+        finalUrl = `https://linkedin.com/in/${inputVal}`;
+      }
+    } else if (currentSocialPlatform === 'youtube') {
+      if (!inputVal.startsWith('http')) {
+        finalUrl = inputVal.startsWith('@') ? `https://youtube.com/${inputVal}` : `https://youtube.com/@${inputVal}`;
+      }
+    }
+
+    document.querySelectorAll(`[data-platform="${currentSocialPlatform}"]`).forEach(el => {
+      el.href = finalUrl;
+      el.target = '_blank';
+      el.rel = 'noopener noreferrer';
+    });
+
     const data = getSavedData();
     data.socialLinks = data.socialLinks || {};
-    data.socialLinks[currentSocialPlatform] = url;
+    data.socialLinks[currentSocialPlatform] = finalUrl;
     saveData(data);
-    document.getElementById('socialModal').classList.remove('open');
-    showToast(`🔗 ${currentSocialPlatform} link save ho gaya!`);
+
+    document.getElementById('socialModal')?.classList.remove('open');
+    showToast(`🔗 ${currentSocialPlatform.toUpperCase()} connect ho gaya!`);
   });
 
   // Keyboard shortcuts
@@ -1017,9 +1050,32 @@ function openSocialModal(platform, el) {
   const data = getSavedData();
   const label = document.getElementById('socialModalLabel');
   const input = document.getElementById('socialUrlInput');
-  if (label) label.textContent = (platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : 'Social') + ' link enter karein';
-  if (input) input.value = (data.socialLinks && data.socialLinks[platform]) || el?.getAttribute('href') || '';
-  document.getElementById('socialModal')?.classList.add('open');
+  const modal = document.getElementById('socialModal');
+
+  if (label) {
+    if (platform === 'whatsapp') label.textContent = 'WhatsApp Number ya Link enter karein:';
+    else label.textContent = (platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : 'Social') + ' username ya link:';
+  }
+
+  if (input) {
+    const existing = (data.socialLinks && data.socialLinks[platform]) || (el?.getAttribute('href') !== '#' ? el?.getAttribute('href') : '') || '';
+    input.value = existing;
+    if (platform === 'whatsapp') {
+      input.placeholder = 'e.g. 03392332272 ya 923392332272';
+    } else if (platform === 'instagram') {
+      input.placeholder = 'e.g. @yourusername ya direct link';
+    } else {
+      input.placeholder = `e.g. yourusername ya https://${platform}.com/...`;
+    }
+    setTimeout(() => input.focus(), 100);
+  }
+
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.opacity = '1';
+    modal.style.visibility = 'visible';
+    modal.classList.add('open');
+  }
 }
 
 async function saveAll() {
@@ -1136,7 +1192,18 @@ function loadSavedEdits() {
   }
   if (data.socialLinks) {
     Object.entries(data.socialLinks).forEach(([platform, url]) => {
-      document.querySelectorAll(`[data-platform="${platform}"]`).forEach(el => el.href = url);
+      document.querySelectorAll(`[data-platform="${platform}"]`).forEach(el => {
+        el.href = url;
+        el.target = '_blank';
+        el.rel = 'noopener noreferrer';
+      });
+    });
+  } else {
+    // Default fallback for WhatsApp
+    document.querySelectorAll('[data-platform="whatsapp"]').forEach(el => {
+      el.href = 'https://wa.me/923392332272';
+      el.target = '_blank';
+      el.rel = 'noopener noreferrer';
     });
   }
   if (data.softwareTags && Array.isArray(data.softwareTags) && data.softwareTags.length) {
