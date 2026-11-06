@@ -544,8 +544,8 @@ function initContactForm() {
     });
   }
 
-  // Direct Email Send
-  form.addEventListener('submit', e => {
+  // Direct Email Send via FormSubmit AJAX to designcorner488@gmail.com
+  form.addEventListener('submit', async e => {
     e.preventDefault();
     const name    = document.getElementById('cf-name')?.value.trim();
     const email   = document.getElementById('cf-email')?.value.trim();
@@ -553,14 +553,57 @@ function initContactForm() {
     const msg     = document.getElementById('cf-message')?.value.trim();
     if (!name || !email || !msg) return;
 
-    const subject = `Portfolio Inquiry — ${service || 'General'} from ${name}`;
-    const body    = `Name: ${name}\nEmail: ${email}\nService: ${service || 'Not specified'}\n\nMessage:\n${msg}`;
-    const em      = document.getElementById('cd-email')?.textContent || 'designcorner488@gmail.com';
-    window.location.href = `mailto:${em}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const targetEmail = (document.getElementById('cd-email')?.textContent || 'designcorner488@gmail.com').trim();
+    const submitBtn = document.getElementById('btnSendEmail');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending to ' + targetEmail + '...';
+    }
 
-    const success = document.getElementById('formSuccess');
-    if (success) { success.style.display = 'flex'; setTimeout(() => success.style.display = 'none', 5000); }
-    form.reset();
+    try {
+      // Direct AJAX delivery to Gmail inbox without opening mail client
+      const res = await fetch(`https://formsubmit.co/ajax/${targetEmail}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          _subject: `New Portfolio Inquiry from ${name} (${service || 'General'})`,
+          _captcha: 'false',
+          name: name,
+          email: email,
+          service: service || 'General',
+          message: msg,
+          _template: 'table'
+        })
+      });
+
+      if (res.ok) {
+        showToast('✅ Message aapki email (' + targetEmail + ') par bhej diya gaya hai!');
+        const success = document.getElementById('formSuccess');
+        if (success) {
+          success.style.display = 'flex';
+          success.innerHTML = '<i class="fas fa-check-circle"></i> Message direct aapki email par send ho gaya!';
+          setTimeout(() => success.style.display = 'none', 6000);
+        }
+        form.reset();
+      } else {
+        throw new Error('Server returned non-200');
+      }
+    } catch(err) {
+      console.warn('Direct delivery fallback to mailto:', err);
+      // Fallback: mailto
+      const subject = `Portfolio Inquiry — ${service || 'General'} from ${name}`;
+      const body = `Name: ${name}\nEmail: ${email}\nService: ${service || 'Not specified'}\n\nMessage:\n${msg}`;
+      window.location.href = `mailto:${targetEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      showToast('✉️ Email app open ho rahi hai...');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Send Message via Email</span><i class="fas fa-paper-plane"></i>';
+      }
+    }
   });
 }
 
