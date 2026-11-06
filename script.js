@@ -544,72 +544,127 @@ function initContactForm() {
     });
   }
 
-  // Direct Email Send via FormSubmit AJAX to designcorner488@gmail.com
+  // ----------------------------------------------------------------
+  // SEND MESSAGE — Web3Forms (direct server-to-server, no client email needed)
+  // ----------------------------------------------------------------
   form.addEventListener('submit', async e => {
     e.preventDefault();
     const name    = document.getElementById('cf-name')?.value.trim();
     const email   = document.getElementById('cf-email')?.value.trim();
     const service = document.getElementById('cf-service')?.value;
     const msg     = document.getElementById('cf-message')?.value.trim();
-    if (!name || !email || !msg) return;
+    if (!name || !email || !msg) {
+      showToast('\u26a0\ufe0f Apna naam, email aur message zaroor likhein!', 'error');
+      return;
+    }
 
-    const targetEmail = (document.getElementById('cd-email')?.textContent || 'designcorner488@gmail.com').trim();
     const submitBtn = document.getElementById('btnSendEmail');
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending to ' + targetEmail + '...';
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Bheja ja raha hai...';
     }
 
-    try {
-      // 4-second fast timeout controller
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+    // --- Primary: Web3Forms (free, no client email app needed) ---
+    // ACCESS KEY: Get yours free from https://web3forms.com (enter designcorner488@gmail.com)
+    const WEB3FORMS_KEY = 'YOUR_WEB3FORMS_ACCESS_KEY'; // <-- Replace this after signup
 
-      // Direct AJAX delivery to Gmail inbox
-      const res = await fetch(`https://formsubmit.co/ajax/${targetEmail}`, {
-        method: 'POST',
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          _subject: `New Portfolio Inquiry from ${name} (${service || 'General'})`,
-          _captcha: 'false',
-          name: name,
-          email: email,
-          service: service || 'General',
-          message: msg,
-          _template: 'table'
-        })
-      });
-      clearTimeout(timeoutId);
+    let sent = false;
 
-      if (res.ok) {
-        showToast('✅ Message aapki email (' + targetEmail + ') par bhej diya gaya hai!');
-        const success = document.getElementById('formSuccess');
-        if (success) {
-          success.style.display = 'flex';
-          success.innerHTML = '<i class="fas fa-check-circle"></i> Message direct aapki email par send ho gaya!';
-          setTimeout(() => success.style.display = 'none', 6000);
+    // Only attempt Web3Forms if key is configured
+    if (WEB3FORMS_KEY && WEB3FORMS_KEY !== 'YOUR_WEB3FORMS_ACCESS_KEY') {
+      try {
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), 8000);
+
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            access_key: WEB3FORMS_KEY,
+            subject: `New Portfolio Inquiry: ${service || 'General'} — from ${name}`,
+            from_name: name,
+            email: email,
+            name: name,
+            service: service || 'General',
+            message: msg,
+            botcheck: ''
+          })
+        });
+        clearTimeout(tid);
+
+        const data = await res.json();
+        if (data.success) {
+          sent = true;
+          showToast('\u2705 Message seedha aapki email par pahunch gaya!');
+          const success = document.getElementById('formSuccess');
+          if (success) {
+            success.style.display = 'flex';
+            success.innerHTML = '<i class="fas fa-check-circle"></i> Message successfully send ho gaya! Hum jaldi jawab denge.';
+            setTimeout(() => success.style.display = 'none', 7000);
+          }
+          form.reset();
+        } else {
+          throw new Error(data.message || 'Web3Forms error');
         }
-        form.reset();
-      } else {
-        throw new Error('Server returned non-200');
+      } catch(err) {
+        console.warn('Web3Forms attempt failed:', err);
       }
-    } catch(err) {
-      console.warn('formsubmit.co failed — opening Gmail Web Compose:', err);
-      // Fallback: mailto
-      const subject = `Portfolio Inquiry — ${service || 'General'} from ${name}`;
-      const body = `Name: ${name}\nEmail: ${email}\nService: ${service || 'Not specified'}\n\nMessage:\n${msg}`;
-      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(targetEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    // --- Secondary: FormSubmit.co (backup) ---
+    if (!sent) {
+      try {
+        const targetEmail = (document.getElementById('cd-email')?.textContent || 'designcorner488@gmail.com').trim();
+        const controller2 = new AbortController();
+        const tid2 = setTimeout(() => controller2.abort(), 6000);
+
+        const res2 = await fetch(`https://formsubmit.co/ajax/${targetEmail}`, {
+          method: 'POST',
+          signal: controller2.signal,
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            _subject: `Portfolio Inquiry from ${name} (${service || 'General'})`,
+            _captcha: 'false',
+            _template: 'table',
+            name, email,
+            service: service || 'General',
+            message: msg
+          })
+        });
+        clearTimeout(tid2);
+
+        if (res2.ok) {
+          sent = true;
+          showToast('\u2705 Message send ho gaya!');
+          const success = document.getElementById('formSuccess');
+          if (success) {
+            success.style.display = 'flex';
+            success.innerHTML = '<i class="fas fa-check-circle"></i> Message successfully send ho gaya!';
+            setTimeout(() => success.style.display = 'none', 7000);
+          }
+          form.reset();
+        } else {
+          throw new Error('FormSubmit non-200');
+        }
+      } catch(err2) {
+        console.warn('FormSubmit also failed, using Gmail Web Compose fallback:', err2);
+      }
+    }
+
+    // --- Final Fallback: Gmail Web Compose (only if both APIs fail) ---
+    if (!sent) {
+      const targetEmail = (document.getElementById('cd-email')?.textContent || 'designcorner488@gmail.com').trim();
+      const subject = encodeURIComponent(`Portfolio Inquiry: ${service || 'General'} from ${name}`);
+      const body    = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nService: ${service || 'Not specified'}\n\nMessage:\n${msg}`);
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(targetEmail)}&su=${subject}&body=${body}`;
       window.open(gmailUrl, '_blank');
-      showToast('📧 Gmail khul raha hai — message pehle se bhara hua hai, bas Send dabayein!');
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Send Message via Email</span><i class="fas fa-paper-plane"></i>';
-      }
+      showToast('\u{1F4E7} Servers down hain — Gmail open ho raha hai. Message pehle se bhara hua hai, bas Send dabayein.');
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>Send Message</span><i class="fas fa-paper-plane"></i>';
     }
   });
 }
