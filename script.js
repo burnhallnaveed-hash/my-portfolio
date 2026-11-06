@@ -203,6 +203,11 @@ function initSkillBars() {
    COUNTERS
    ============================================================ */
 function initCounters() {
+  const data = getSavedData();
+  if (data?.text?.statProjects || data?.text?.statClients || data?.text?.statYears) {
+    // User edited stats — keep their custom numbers/text
+    return;
+  }
   const totalProjects = portfolioData?.projects?.length || 7;
   animateNum('stat-projects', Math.max(totalProjects, 7));
   animateNum('stat-clients',  15);
@@ -773,6 +778,16 @@ function toggleEditMode() {
     document.querySelectorAll('.editable').forEach(el => {
       el.setAttribute('contenteditable', 'true');
       el.setAttribute('spellcheck', 'false');
+      // Auto-save on blur
+      if (!el._hasSaveListener && el.dataset.key) {
+        el._hasSaveListener = true;
+        el.addEventListener('blur', () => {
+          const d = getSavedData();
+          d.text = d.text || {};
+          d.text[el.dataset.key] = el.innerHTML;
+          saveData(d);
+        });
+      }
     });
     // GLB viewer handled separately
     // Social links — click to set URL
@@ -792,6 +807,7 @@ function toggleEditMode() {
 }
 
 function renderOrbitTags() {
+  renderDynamicOrbitSystem();
   const container = document.getElementById('floatingTags');
   if (!container) return;
   container.innerHTML = '';
@@ -1052,117 +1068,325 @@ console.log('%cCtrl+E = Toggle Edit | Ctrl+S = Save', 'color:#06b6d4;');
 
 
 
+
 /* ============================================================
-   GLB 3D MODEL VIEWER SYSTEM — Scroll-driven, up to 30 models
+   DYNAMIC ORBIT SYSTEM — 1 Rotating Planet per Software Tag
    ============================================================ */
+const SOFTWARE_CONFIGS = {
+  'blender':      { icon: 'fas fa-cube', grad: 'linear-gradient(135deg,#f7931e,#f59e0b)' },
+  'revit':        { icon: 'fas fa-drafting-compass', grad: 'linear-gradient(135deg,#0696d7,#06b6d4)' },
+  'd5':           { icon: 'fas fa-photo-film', grad: 'linear-gradient(135deg,#10b981,#059669)' },
+  'd5 render':    { icon: 'fas fa-photo-film', grad: 'linear-gradient(135deg,#10b981,#059669)' },
+  'animation':    { icon: 'fas fa-film', grad: 'linear-gradient(135deg,#7c3aed,#ec4899)' },
+  '3d animation': { icon: 'fas fa-film', grad: 'linear-gradient(135deg,#7c3aed,#ec4899)' },
+  'lumion':       { icon: 'fas fa-sun', grad: 'linear-gradient(135deg,#f59e0b,#ef4444)' },
+  'rhino':        { icon: 'fas fa-draw-polygon', grad: 'linear-gradient(135deg,#ec4899,#8b5cf6)' },
+  'vectorworks':  { icon: 'fas fa-pen-ruler', grad: 'linear-gradient(135deg,#06b6d4,#3b82f6)' },
+  'bim':          { icon: 'fas fa-cubes', grad: 'linear-gradient(135deg,#10b981,#06b6d4)' },
+  'bim modelling':{ icon: 'fas fa-cubes', grad: 'linear-gradient(135deg,#10b981,#06b6d4)' },
+  'autocad':      { icon: 'fas fa-compass-drafting', grad: 'linear-gradient(135deg,#ef4444,#f97316)' },
+  '3ds max':      { icon: 'fas fa-gem', grad: 'linear-gradient(135deg,#6366f1,#a855f7)' },
+  'sketchup':     { icon: 'fas fa-house', grad: 'linear-gradient(135deg,#ef4444,#3b82f6)' },
+  'vray':         { icon: 'fas fa-wand-magic-sparkles', grad: 'linear-gradient(135deg,#3b82f6,#10b981)' },
+  'photoshop':    { icon: 'fas fa-palette', grad: 'linear-gradient(135deg,#3b82f6,#06b6d4)' }
+};
 
-let glbModels = [];          // Array of {name, url, objectURL}
-let glbIndex  = 0;
-const GLB_MAX = 30;
+function getSoftwareConfig(name) {
+  const key = (name || '').toLowerCase().trim();
+  for (const [k, v] of Object.entries(SOFTWARE_CONFIGS)) {
+    if (key.includes(k)) return v;
+  }
+  const defaultColors = [
+    'linear-gradient(135deg,#f7931e,#f59e0b)',
+    'linear-gradient(135deg,#0696d7,#06b6d4)',
+    'linear-gradient(135deg,#10b981,#059669)',
+    'linear-gradient(135deg,#7c3aed,#ec4899)',
+    'linear-gradient(135deg,#f59e0b,#ef4444)',
+    'linear-gradient(135deg,#ec4899,#8b5cf6)',
+    'linear-gradient(135deg,#06b6d4,#3b82f6)',
+    'linear-gradient(135deg,#10b981,#06b6d4)'
+  ];
+  let sum = 0;
+  for (let j = 0; j < (name || '').length; j++) sum += name.charCodeAt(j);
+  return { icon: 'fas fa-circle-nodes', grad: defaultColors[sum % defaultColors.length] };
+}
 
-function initGLBViewer() {
+function renderDynamicOrbitSystem() {
+  const container = document.getElementById('orbitContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  const total = currentSoftwareTags.length;
+  if (!total) return;
+
+  const trackCount = Math.min(Math.max(3, Math.ceil(total / 2)), 5);
+  const minD = 175;
+  const maxD = 390;
+  const step = (maxD - minD) / Math.max(trackCount - 1, 1);
+
+  currentSoftwareTags.forEach((name, i) => {
+    const trackIndex = i % trackCount;
+    const diameter = Math.round(minD + trackIndex * step);
+    const startAngle = Math.round((i * (360 / total)) % 360);
+    const speed = 9 + (trackIndex * 3.5);
+
+    const ring = document.createElement('div');
+    ring.className = 'orbit-ring dynamic-ring';
+    ring.style.width = diameter + 'px';
+    ring.style.height = diameter + 'px';
+    ring.style.setProperty('--start-angle', startAngle + 'deg');
+    ring.style.animation = `dynamicOrbit ${speed}s linear infinite`;
+
+    const conf = getSoftwareConfig(name);
+    const planet = document.createElement('div');
+    planet.className = 'planet';
+    planet.style.background = conf.grad;
+    planet.style.setProperty('--start-angle', startAngle + 'deg');
+    planet.style.animation = `dynamicCounterRotate ${speed}s linear infinite`;
+    planet.title = `${name} — Click to manage`;
+    planet.innerHTML = `<i class="${conf.icon}"></i>`;
+    planet.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openSoftwareModal();
+    });
+
+    ring.appendChild(planet);
+    container.appendChild(ring);
+  });
+}
+
+/* ============================================================
+   INDEXEDDB MEDIA STORE — 3D Models (GLB) & Animations (MP4)
+   ============================================================ */
+const IDB_NAME = 'PortfolioMediaDB_v2';
+const IDB_STORE = 'models_animations';
+
+function openMediaDB() {
+  return new Promise((resolve, reject) => {
+    if (!window.indexedDB) return reject('IndexedDB not supported');
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => {
+      req.result.createObjectStore(IDB_STORE, { keyPath: 'id', autoIncrement: true });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbSaveItem(item) {
+  try {
+    const db = await openMediaDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      tx.objectStore(IDB_STORE).add(item);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch(e) { console.warn('IDB Save error:', e); }
+}
+
+async function dbGetAllItems() {
+  try {
+    const db = await openMediaDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const req = tx.objectStore(IDB_STORE).getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch(e) { console.warn('IDB Get error:', e); return []; }
+}
+
+async function dbDeleteItem(id) {
+  try {
+    const db = await openMediaDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      tx.objectStore(IDB_STORE).delete(id);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch(e) { console.warn('IDB Delete error:', e); }
+}
+
+/* ============================================================
+   3D GLB & VIDEO ANIMATION VIEWER (Scroll-driven, up to 30)
+   ============================================================ */
+let mediaList = [];
+let mediaIndex = 0;
+const MEDIA_MAX = 30;
+
+// Default 3D model fallback so it never renders blank
+const DEFAULT_SAMPLE_MODEL = {
+  id: 'sample-default',
+  name: 'Architectural 3D Model',
+  type: 'glb',
+  url: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb'
+};
+
+async function initGLBViewer() {
   const fileInput     = document.getElementById('glbFileInput');
   const fileInputMore = document.getElementById('glbFileInputMore');
   const prevBtn       = document.getElementById('glbPrevBtn');
   const nextBtn       = document.getElementById('glbNextBtn');
+  const delBtn        = document.getElementById('glbDelBtn');
 
-  if (fileInput)     fileInput.addEventListener('change',     e => handleGLBFiles(e.target.files));
-  if (fileInputMore) fileInputMore.addEventListener('change', e => handleGLBFiles(e.target.files));
-  if (prevBtn)       prevBtn.addEventListener('click', () => setGLBModel(glbIndex - 1));
-  if (nextBtn)       nextBtn.addEventListener('click', () => setGLBModel(glbIndex + 1));
+  if (fileInput)     fileInput.addEventListener('change',     e => handleUploadFiles(e.target.files));
+  if (fileInputMore) fileInputMore.addEventListener('change', e => handleUploadFiles(e.target.files));
+  if (prevBtn)       prevBtn.addEventListener('click', () => setMediaIndex(mediaIndex - 1));
+  if (nextBtn)       nextBtn.addEventListener('click', () => setMediaIndex(mediaIndex + 1));
+  if (delBtn)        delBtn.addEventListener('click', deleteCurrentMedia);
 
-  // Click on add-more button (label)
-  const addLabel = document.getElementById('glbAddLabel');
-  if (addLabel) addLabel.addEventListener('click', e => e.stopPropagation());
-
-  // Scroll wheel inside viewer changes model
+  // Mouse wheel scroll to switch models/animations
   const wrap = document.getElementById('glbViewerWrap');
   if (wrap) {
+    let scrollCoolDown = 0;
     wrap.addEventListener('wheel', e => {
-      if (glbModels.length < 2) return;
+      if (mediaList.length < 2) return;
       e.preventDefault();
-      if (e.deltaY > 0) setGLBModel(glbIndex + 1);
-      else              setGLBModel(glbIndex - 1);
+      const now = Date.now();
+      if (now - scrollCoolDown < 350) return;
+      scrollCoolDown = now;
+      if (e.deltaY > 0) setMediaIndex(mediaIndex + 1);
+      else              setMediaIndex(mediaIndex - 1);
     }, { passive: false });
   }
 
-  // Touch swipe inside viewer
+  // Touch swipe support
   let touchStartY = 0;
   if (wrap) {
     wrap.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
     wrap.addEventListener('touchend',   e => {
       const dy = touchStartY - e.changedTouches[0].clientY;
       if (Math.abs(dy) > 40) {
-        if (dy > 0) setGLBModel(glbIndex + 1);
-        else        setGLBModel(glbIndex - 1);
+        if (dy > 0) setMediaIndex(mediaIndex + 1);
+        else        setMediaIndex(mediaIndex - 1);
       }
     });
   }
 
-  // Load saved models from localStorage
-  loadSavedGLBModels();
+  await loadSavedMedia();
 }
 
-function handleGLBFiles(files) {
+async function handleUploadFiles(files) {
   if (!files || !files.length) return;
-  const remaining = GLB_MAX - glbModels.length;
-  const toLoad    = Math.min(files.length, remaining);
-  if (toLoad < files.length) {
-    showToast('⚠️ Max ' + GLB_MAX + ' models allowed!', 'error');
+  const remaining = MEDIA_MAX - mediaList.length;
+  const toProcess = Math.min(files.length, remaining);
+  if (toProcess < files.length) {
+    showToast(`⚠️ Max ${MEDIA_MAX} models/animations allow hain!`, 'error');
   }
-  let loaded = 0;
-  for (let i = 0; i < toLoad; i++) {
+
+  let successCount = 0;
+  for (let i = 0; i < toProcess; i++) {
     const file = files[i];
-    if (!file.name.match(/\.(glb|gltf)$/i)) continue;
-    const url = URL.createObjectURL(file);
-    // Store as base64 for persistence
-    const reader = new FileReader();
-    reader.onload = ev => {
-      glbModels.push({ name: file.name.replace(/\.[^.]+$/, ''), url, b64: ev.target.result });
-      loaded++;
-      if (loaded === toLoad) {
-        saveGLBModels();
-        setGLBModel(glbIndex === 0 ? 0 : glbModels.length - 1);
-        showUI();
-        showToast('🎉 ' + toLoad + ' model(s) load ho gaye!');
-      }
+    const isModel = file.name.match(/\.(glb|gltf)$/i);
+    const isVideo = file.name.match(/\.(mp4|webm)$/i);
+    if (!isModel && !isVideo) continue;
+
+    const item = {
+      name: file.name.replace(/\.[^.]+$/, ''),
+      type: isModel ? 'glb' : 'video',
+      blob: file
     };
-    reader.readAsDataURL(file);
+
+    await dbSaveItem(item);
+    successCount++;
+  }
+
+  if (successCount > 0) {
+    showToast(`🎉 ${successCount} item(s) successfully save ho gaye!`);
+    await loadSavedMedia();
+    setMediaIndex(mediaList.length - 1);
   }
 }
 
-function showUI() {
+async function loadSavedMedia() {
+  const fromDB = await dbGetAllItems();
+  mediaList = [];
+
+  fromDB.forEach(item => {
+    mediaList.push({
+      id: item.id,
+      name: item.name,
+      type: item.type,
+      url: URL.createObjectURL(item.blob)
+    });
+  });
+
+  // If user has not uploaded anything, load fallback sample model so screen is never black!
+  if (!mediaList.length) {
+    mediaList.push(DEFAULT_SAMPLE_MODEL);
+  }
+
+  showMediaUI();
+  setMediaIndex(0);
+}
+
+function showMediaUI() {
   const placeholder = document.getElementById('glbPlaceholder');
   const container   = document.getElementById('glbViewerContainer');
   const addLabel    = document.getElementById('glbAddLabel');
   if (placeholder) placeholder.style.display = 'none';
   if (container)   container.style.display   = 'block';
-  if (addLabel && glbModels.length < GLB_MAX) addLabel.style.display = 'inline-flex';
-  renderGLBDots();
+  if (addLabel && mediaList.length < MEDIA_MAX) addLabel.style.display = 'inline-flex';
+  renderMediaDots();
 }
 
-function setGLBModel(idx) {
-  if (!glbModels.length) return;
-  glbIndex = ((idx % glbModels.length) + glbModels.length) % glbModels.length;
-  const mv = document.getElementById('mainModelViewer');
-  if (mv) {
-    mv.setAttribute('src', glbModels[glbIndex].url || glbModels[glbIndex].b64);
-    // Trigger auto-rotate restart
-    mv.removeAttribute('auto-rotate');
-    setTimeout(() => mv.setAttribute('auto-rotate', ''), 100);
-  }
+function setMediaIndex(idx) {
+  if (!mediaList.length) return;
+  mediaIndex = ((idx % mediaList.length) + mediaList.length) % mediaList.length;
+  const current = mediaList[mediaIndex];
+
+  const mv  = document.getElementById('mainModelViewer');
+  const vid = document.getElementById('mainVideoViewer');
   const counter = document.getElementById('glbCounter');
   const name    = document.getElementById('glbModelName');
-  if (counter) counter.textContent = (glbIndex + 1) + ' / ' + glbModels.length;
-  if (name)    name.textContent    = glbModels[glbIndex].name;
   const prevBtn = document.getElementById('glbPrevBtn');
   const nextBtn = document.getElementById('glbNextBtn');
-  if (prevBtn) prevBtn.disabled = glbModels.length <= 1;
-  if (nextBtn) nextBtn.disabled = glbModels.length <= 1;
-  renderGLBDots();
+
+  if (counter) counter.textContent = `${mediaIndex + 1} / ${mediaList.length}`;
+  if (name)    name.textContent    = current.name || '3D Asset';
+
+  if (current.type === 'video') {
+    if (mv) mv.style.display = 'none';
+    if (vid) {
+      vid.style.display = 'block';
+      vid.src = current.url;
+      vid.play().catch(() => {});
+    }
+  } else {
+    // 3D Model GLB
+    if (vid) {
+      vid.pause();
+      vid.style.display = 'none';
+    }
+    if (mv) {
+      mv.style.display = 'block';
+      mv.setAttribute('src', current.url);
+      mv.removeAttribute('auto-rotate');
+      setTimeout(() => mv.setAttribute('auto-rotate', ''), 100);
+    }
+  }
+
+  if (prevBtn) prevBtn.disabled = mediaList.length <= 1;
+  if (nextBtn) nextBtn.disabled = mediaList.length <= 1;
+  renderMediaDots();
 }
 
-function renderGLBDots() {
+async function deleteCurrentMedia() {
+  if (!mediaList.length) return;
+  const current = mediaList[mediaIndex];
+  if (current.id === 'sample-default') {
+    showToast('Yeh default sample model hai! Apna model upload karein.', 'error');
+    return;
+  }
+  if (!confirm(`Kya aap "${current.name}" ko delete karna chahte hain?`)) return;
+
+  await dbDeleteItem(current.id);
+  showToast(`🗑️ "${current.name}" delete ho gaya!`);
+  await loadSavedMedia();
+}
+
+function renderMediaDots() {
   let dotsWrap = document.getElementById('glbDots');
   if (!dotsWrap) {
     dotsWrap = document.createElement('div');
@@ -1172,44 +1396,16 @@ function renderGLBDots() {
     if (wrap) wrap.appendChild(dotsWrap);
   }
   dotsWrap.innerHTML = '';
-  if (glbModels.length <= 1) return;
-  glbModels.forEach((m, i) => {
+  if (mediaList.length <= 1) return;
+  mediaList.forEach((m, i) => {
     const dot = document.createElement('div');
-    dot.className = 'glb-dot' + (i === glbIndex ? ' active' : '');
-    dot.title = m.name;
-    dot.addEventListener('click', () => setGLBModel(i));
+    dot.className = 'glb-dot' + (i === mediaIndex ? ' active' : '');
+    dot.title = `${m.name} (${m.type.toUpperCase()})`;
+    dot.addEventListener('click', () => setMediaIndex(i));
     dotsWrap.appendChild(dot);
   });
 }
 
-function saveGLBModels() {
-  try {
-    // Only save name + b64 (url is object URL, not persistent)
-    const toSave = glbModels.map(m => ({ name: m.name, b64: m.b64 }));
-    localStorage.setItem('glb_models', JSON.stringify(toSave));
-  } catch(e) {
-    showToast('⚠️ Models save nahi hue (storage full)', 'error');
-  }
-}
-
-function loadSavedGLBModels() {
-  try {
-    const saved = JSON.parse(localStorage.getItem('glb_models') || '[]');
-    if (!saved.length) return;
-    glbModels = saved.map(m => ({
-      name: m.name,
-      b64:  m.b64,
-      url:  m.b64   // use b64 as URL since object URLs don't persist
-    }));
-    showUI();
-    setGLBModel(0);
-  } catch(e) {
-    console.warn('GLB load error:', e);
-  }
-}
-
-// Expose to window
-window.initGLBViewer = initGLBViewer;
 
 /* ============================================================
    BOOT PORTFOLIO (EXECUTES AFTER ALL DEFINITIONS)

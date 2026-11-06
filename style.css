@@ -172,7 +172,7 @@ a, button, .tag, .filter-btn, .btn-primary, .btn-secondary, .btn-orbit-add-pill,
 
 /* ORBITAL HERO */
 .hero-visual{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.orbit-actions-bar{display:flex;justify-content:flex-end;margin-top:1.2rem;padding-right:.5rem;position:relative;z-index:30}
+.orbit-actions-bar{display:flex;justify-content:center;margin-top:5.5rem;position:relative;z-index:30;width:100%}
 .btn-orbit-add-pill{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1.2rem;background:linear-gradient(135deg,#7c3aed,#06b6d4);border:none;border-radius:50px;color:#fff;font-size:.8rem;font-weight:700;cursor:pointer;transition:var(--transition);box-shadow:0 4px 20px rgba(124,58,237,.5);position:relative;z-index:30}
 .btn-orbit-add-pill:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(124,58,237,.8)}
 .hero-3d-card{position:relative;width:420px;height:420px;animation:fadeSlideIn 1s ease .8s both}
@@ -197,7 +197,7 @@ a, button, .tag, .filter-btn, .btn-primary, .btn-secondary, .btn-orbit-add-pill,
 .t3{bottom:25%;left:-18%;animation-delay:2s;border-color:rgba(16,185,129,.4);color:var(--green)}
 .t4{bottom:15%;right:-12%;animation-delay:.5s;border-color:rgba(168,85,247,.4);color:var(--accent2)}
 .t5{top:-12%;left:36%;animation-delay:1.5s;border-color:rgba(245,158,11,.4);color:#f59e0b}
-.t6{bottom:-8%;left:36%;animation-delay:2.5s;border-color:rgba(236,72,153,.4);color:#ec4899}
+.t6{bottom:-2%;left:36%;animation-delay:2.5s;border-color:rgba(236,72,153,.4);color:#ec4899}
 .t7{top:46%;left:-24%;animation-delay:3s;border-color:rgba(56,189,248,.4);color:#38bdf8}
 .t8{top:46%;right:-24%;animation-delay:1.8s;border-color:rgba(139,92,246,.4);color:#8b5cf6}
 .t9{top:28%;right:-26%;animation-delay:2.2s;border-color:rgba(52,211,153,.4);color:#34d399}
@@ -452,3 +452,112 @@ body.edit-mode .glb-viewer-wrap{outline:2px dashed rgba(168,85,247,.5);border-ra
 body.edit-mode .glb-add-more-btn{display:inline-flex !important}
 /* Loading spinner on model-viewer */
 #mainModelViewer::part(default-progress-bar){height:3px;background:var(--gradient)}
+
+/* DYNAMIC ORBIT RINGS & PLANETS (1 per software tag) */
+@keyframes dynamicOrbit {
+  from { transform: rotate(var(--start-angle, 0deg)); }
+  to { transform: rotate(calc(var(--start-angle, 0deg) + 360deg)); }
+}
+@keyframes dynamicCounterRotate {
+  from { transform: rotate(calc(-1 * var(--start-angle, 0deg))); }
+  to { transform: rotate(calc(-1 * var(--start-angle, 0deg) - 360deg)); }
+}
+.orbit-ring.dynamic-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  pointer-events: none;
+}
+.orbit-ring.dynamic-ring .planet {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+  margin-top: -18px;
+}
+.orbit-ring.dynamic-ring .planet:hover {
+  transform: scale(1.3) !important;
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.9);
+}
+
+/* 3D GLB & VIDEO VIEWER FIXED HEIGHT */
+.glb-viewer-wrap {
+  width: 100% !important;
+  height: 440px !important;
+  min-height: 400px !important;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.glb-viewer-container {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #18182b 0%, #0a0a14 100%);
+}
+#mainModelViewer {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+#mainVideoViewer {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  background: #05050a;
+  display: none;
+}
+.glb-del-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.75);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #fff;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.glb-del-btn:hover {
+  background: #dc2626;
+  transform: scale(1.15);
+}
+body.edit-mode .glb-del-btn {
+  display: inline-flex !important;
+}
+
+/* ALL EDITABLE TEXT ENHANCED HIGHLIGHT */
+body.edit-mode .editable {
+  outline: 2px dashed rgba(168, 85, 247, 0.6) !important;
+  border-radius: 4px;
+  cursor: text !important;
+  min-width: 15px;
+  display: inline-block;
+  transition: outline 0.2s, background 0.2s;
+}
+body.edit-mode .editable:hover {
+  outline: 2px solid var(--accent2) !important;
+  background: rgba(168, 85, 247, 0.12) !important;
+}
+body.edit-mode .editable:focus {
+  outline: 2px solid var(--accent3) !important;
+  background: rgba(6, 182, 212, 0.12) !important;
+}

@@ -16,7 +16,7 @@ window.addEventListener('error', function(e) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="style.css?v=12.0"/>
+  <link rel="stylesheet" href="style.css?v=13.0"/>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 </head>
 <body>
@@ -120,25 +120,25 @@ window.addEventListener('error', function(e) {
     </div>
     <div class="hero-stats">
       <div class="stat">
-        <span class="stat-num" id="stat-projects">0</span><span>+</span>
-        <span class="stat-label">Projects</span>
+        <span class="stat-num editable" data-key="statProjects" id="stat-projects">7</span><span>+</span>
+        <span class="stat-label editable" data-key="statProjLbl">Projects</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
-        <span class="stat-num" id="stat-clients">0</span><span>+</span>
-        <span class="stat-label">Clients</span>
+        <span class="stat-num editable" data-key="statClients" id="stat-clients">15</span><span>+</span>
+        <span class="stat-label editable" data-key="statClientsLbl">Clients</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat">
-        <span class="stat-num" id="stat-years">0</span><span>+</span>
-        <span class="stat-label">Years Exp.</span>
+        <span class="stat-num editable" data-key="statYears" id="stat-years">3</span><span>+</span>
+        <span class="stat-label editable" data-key="statYearsLbl">Years Exp.</span>
       </div>
     </div>
   </div>
   <div class="hero-visual">
     <div class="hero-3d-card">
       <div class="card-inner">
-        <div class="orbit">
+        <div class="orbit" id="orbitContainer">
           <div class="orbit-ring ring1"><div class="planet p1"><i class="fas fa-cube"></i></div></div>
           <div class="orbit-ring ring2"><div class="planet p2"><i class="fas fa-drafting-compass"></i></div></div>
           <div class="orbit-ring ring3"><div class="planet p3"><i class="fas fa-film"></i></div></div>
@@ -175,11 +175,11 @@ window.addEventListener('error', function(e) {
           <div class="glb-viewer-wrap" id="glbViewerWrap">
             <div class="glb-placeholder" id="glbPlaceholder">
               <i class="fas fa-cube"></i>
-              <span>3D Model Upload Karein</span>
-              <p class="glb-hint">GLB / GLTF files support<br>Auto-animate hoga!</p>
+              <span>3D Models & Animations Upload Karein</span>
+              <p class="glb-hint">GLB / GLTF 3D Models aur MP4 / WebM Animations<br>Auto-rotate, 360° orbit aur auto-play hoga!</p>
               <label class="glb-upload-btn" id="glbUploadLabel">
-                <i class="fas fa-upload"></i> Upload 3D Model
-                <input type="file" id="glbFileInput" accept=".glb,.gltf" multiple style="display:none"/>
+                <i class="fas fa-upload"></i> Upload 3D Models / Animations
+                <input type="file" id="glbFileInput" accept=".glb,.gltf,.mp4,.webm" multiple style="display:none"/>
               </label>
             </div>
             <div class="glb-viewer-container" id="glbViewerContainer" style="display:none">
@@ -190,36 +190,50 @@ window.addEventListener('error', function(e) {
                 rotation-per-second="30deg"
                 camera-controls
                 touch-action="pan-y"
-                shadow-intensity="1"
+                shadow-intensity="1.2"
                 environment-image="neutral"
                 exposure="1"
-                style="width:100%;height:100%;background:transparent"
+                autoplay
+                loading="eager"
+                style="width:100%;height:100%;display:block;background:transparent"
               ></model-viewer>
+              <video
+                id="mainVideoViewer"
+                autoplay
+                loop
+                muted
+                playsinline
+                controls
+                style="display:none;width:100%;height:100%;object-fit:contain;background:#05050a;"
+              ></video>
               <div class="glb-nav-overlay">
                 <button class="glb-nav-btn glb-prev" id="glbPrevBtn" title="Previous"><i class="fas fa-chevron-left"></i></button>
                 <div class="glb-info">
                   <span class="glb-counter" id="glbCounter">1 / 1</span>
                   <span class="glb-name" id="glbModelName">Model</span>
                 </div>
-                <button class="glb-nav-btn glb-next" id="glbNextBtn" title="Next"><i class="fas fa-chevron-right"></i></button>
+                <div style="display:flex;align-items:center;gap:.4rem;">
+                  <button class="glb-del-btn" id="glbDelBtn" title="Delete Model / Animation"><i class="fas fa-trash-can"></i></button>
+                  <button class="glb-nav-btn glb-next" id="glbNextBtn" title="Next"><i class="fas fa-chevron-right"></i></button>
+                </div>
               </div>
-              <div class="glb-scroll-hint"><i class="fas fa-arrows-up-down"></i> Scroll to change model</div>
+              <div class="glb-scroll-hint"><i class="fas fa-arrows-up-down"></i> Scroll to switch (up to 30)</div>
             </div>
-            <label class="glb-add-more-btn" id="glbAddLabel" style="display:none" title="Add more 3D Models">
-              <i class="fas fa-plus-circle"></i> Add More Models
-              <input type="file" id="glbFileInputMore" accept=".glb,.gltf" multiple style="display:none"/>
+            <label class="glb-add-more-btn" id="glbAddLabel" style="display:none" title="Add more 3D Models / Animations">
+              <i class="fas fa-plus-circle"></i> Add More (GLB / MP4)
+              <input type="file" id="glbFileInputMore" accept=".glb,.gltf,.mp4,.webm" multiple style="display:none"/>
             </label>
           </div>
           <div class="about-badge-card">
             <i class="fas fa-award"></i>
             <div>
-              <strong id="av-title">Architecture & 3D</strong>
-              <span>Visualization Studio</span>
+              <strong id="av-title" class="editable" data-key="aboutBadgeTitle">Architecture & 3D</strong>
+              <span class="editable" data-key="aboutBadgeSub">Visualization Studio</span>
             </div>
           </div>
           <div class="about-exp-card">
-            <span class="exp-num">3+</span>
-            <span class="exp-label">Years of Experience</span>
+            <span class="exp-num editable" data-key="aboutExpNum">3+</span>
+            <span class="exp-label editable" data-key="aboutExpLbl">Years of Experience</span>
           </div>
         </div>
       </div>
@@ -254,9 +268,9 @@ window.addEventListener('error', function(e) {
 <section class="skills section" id="skills">
   <div class="container">
     <div class="section-header" data-aos="fade-up">
-      <div class="section-tag">My Expertise</div>
-      <h2 class="section-title">Tools & <span class="gradient-text">Skills</span></h2>
-      <p class="section-sub">Cutting-edge tools I use to bring your vision to life</p>
+      <div class="section-tag editable" data-key="skillsTag">My Expertise</div>
+      <h2 class="section-title"><span class="editable" data-key="skillsTitle1">Tools & </span><span class="gradient-text editable" data-key="skillsTitle2">Skills</span></h2>
+      <p class="section-sub editable" data-key="skillsSub">Cutting-edge tools I use to bring your vision to life</p>
     </div>
     <div class="skills-grid" data-aos="fade-up">
       <div class="skill-card">
@@ -309,9 +323,9 @@ window.addEventListener('error', function(e) {
 <section class="projects section" id="work">
   <div class="container">
     <div class="section-header" data-aos="fade-up">
-      <div class="section-tag">My Work</div>
-      <h2 class="section-title">Featured <span class="gradient-text">Projects</span></h2>
-      <p class="section-sub">A showcase of my best work across different domains</p>
+      <div class="section-tag editable" data-key="workTag">My Work</div>
+      <h2 class="section-title"><span class="editable" data-key="workTitle1">Featured </span><span class="gradient-text editable" data-key="workTitle2">Projects</span></h2>
+      <p class="section-sub editable" data-key="workSub">A showcase of my best work across different domains</p>
     </div>
     <!-- FILTER TABS — built by JS from portfolio.json -->
     <div class="filter-tabs" id="filter-bar" data-aos="fade-up">
@@ -347,9 +361,9 @@ window.addEventListener('error', function(e) {
 <section class="gallery-section section" id="gallery">
   <div class="container">
     <div class="section-header" data-aos="fade-up">
-      <div class="section-tag">My Gallery</div>
-      <h2 class="section-title">Work <span class="gradient-text">Showcase</span></h2>
-      <p class="section-sub">All renders, animations and designs in one place</p>
+      <div class="section-tag editable" data-key="galleryTag">My Gallery</div>
+      <h2 class="section-title"><span class="editable" data-key="galleryTitle1">Work </span><span class="gradient-text editable" data-key="galleryTitle2">Showcase</span></h2>
+      <p class="section-sub editable" data-key="gallerySub">All renders, animations and designs in one place</p>
     </div>
     <div class="gallery-grid-masonry" id="gallery-all-grid" data-aos="fade-up">
       <!-- Populated from portfolio.json -->
@@ -361,32 +375,32 @@ window.addEventListener('error', function(e) {
 <section class="services section" id="services">
   <div class="container">
     <div class="section-header" data-aos="fade-up">
-      <div class="section-tag">What I Offer</div>
-      <h2 class="section-title">My <span class="gradient-text">Services</span></h2>
+      <div class="section-tag editable" data-key="servicesTag">What I Offer</div>
+      <h2 class="section-title"><span class="editable" data-key="servicesTitle1">My </span><span class="gradient-text editable" data-key="servicesTitle2">Services</span></h2>
     </div>
     <div class="services-grid">
       <div class="service-card" data-aos="flip-left">
         <div class="service-num">01</div><div class="service-icon"><i class="fas fa-building"></i></div>
-        <h3>Architectural Design</h3>
-        <p>Complete architectural solutions from concept to documentation using Revit BIM technology.</p>
+        <h3 class="editable" data-key="serv1Title">Architectural Design</h3>
+        <p class="editable" data-key="serv1Desc">Complete architectural solutions from concept to documentation using Revit BIM technology.</p>
         <ul><li>Floor Plans & Elevations</li><li>3D Building Models</li><li>BIM Documentation</li></ul>
       </div>
       <div class="service-card" data-aos="flip-left" style="animation-delay:.15s">
         <div class="service-num">02</div><div class="service-icon"><i class="fas fa-eye"></i></div>
-        <h3>3D Visualization</h3>
-        <p>Photorealistic renders and visualizations that bring your designs to life before construction.</p>
+        <h3 class="editable" data-key="serv2Title">3D Visualization</h3>
+        <p class="editable" data-key="serv2Desc">Photorealistic renders and visualizations that bring your designs to life before construction.</p>
         <ul><li>Exterior Renders</li><li>Interior Visualization</li><li>D5 Real-time Renders</li></ul>
       </div>
       <div class="service-card" data-aos="flip-left" style="animation-delay:.3s">
         <div class="service-num">03</div><div class="service-icon"><i class="fas fa-film"></i></div>
-        <h3>3D Animation</h3>
-        <p>Cinematic animations and architectural fly-throughs created with professional Blender workflows.</p>
+        <h3 class="editable" data-key="serv3Title">3D Animation</h3>
+        <p class="editable" data-key="serv3Desc">Cinematic animations and architectural fly-throughs created with professional Blender workflows.</p>
         <ul><li>Architectural Fly-Throughs</li><li>Product Animations</li><li>Motion Graphics</li></ul>
       </div>
       <div class="service-card" data-aos="flip-left" style="animation-delay:.45s">
         <div class="service-num">04</div><div class="service-icon"><i class="fas fa-box-open"></i></div>
-        <h3>Product Design</h3>
-        <p>Premium product visualization and animation for commercial branding and marketing campaigns.</p>
+        <h3 class="editable" data-key="serv4Title">Product Design</h3>
+        <p class="editable" data-key="serv4Desc">Premium product visualization and animation for commercial branding and marketing campaigns.</p>
         <ul><li>Product Modeling</li><li>360° Animations</li><li>Commercial Renders</li></ul>
       </div>
     </div>
@@ -397,9 +411,9 @@ window.addEventListener('error', function(e) {
 <section class="contact section" id="contact">
   <div class="container">
     <div class="section-header" data-aos="fade-up">
-      <div class="section-tag">Get In Touch</div>
-      <h2 class="section-title">Let's Work <span class="gradient-text">Together</span></h2>
-      <p class="section-sub">Have a project in mind? I'd love to hear about it!</p>
+      <div class="section-tag editable" data-key="contactTag">Get In Touch</div>
+      <h2 class="section-title"><span class="editable" data-key="contactTitle1">Let's Work </span><span class="gradient-text editable" data-key="contactTitle2">Together</span></h2>
+      <p class="section-sub editable" data-key="contactSub">Have a project in mind? I'd love to hear about it!</p>
     </div>
     <div class="contact-grid">
       <div class="contact-info" data-aos="fade-right">
@@ -558,6 +572,6 @@ window.addEventListener('error', function(e) {
   </div>
 </div>
 
-<script src="script.js?v=12.0"></script>
+<script src="script.js?v=13.0"></script>
 </body>
 </html>
