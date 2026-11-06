@@ -566,7 +566,68 @@ window.saveAll = saveAll;
 window.handleEditAuth = handleEditAuth;
 window.closeEditAuthModal = closeEditAuthModal;
 
+
+/* ============================================================
+   NAVBAR PNG LOGO UPLOAD & MANAGEMENT
+   ============================================================ */
+function initLogoUpload() {
+  const fileInput = document.getElementById('navLogoFileInput');
+  const removeBtn = document.getElementById('btnLogoRemove');
+
+  if (fileInput) {
+    fileInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const dataUrl = e.target.result;
+        setNavLogo(dataUrl);
+        const d = getSavedData();
+        d.logoImg = dataUrl;
+        saveData(d);
+        showToast('🎨 Logo update ho gaya!');
+      };
+      reader.readAsDataURL(file);
+      this.value = '';
+    });
+  }
+
+  if (removeBtn) {
+    removeBtn.addEventListener('click', () => {
+      setNavLogo(null);
+      const d = getSavedData();
+      delete d.logoImg;
+      saveData(d);
+      showToast('Logo remove ho gaya!', 'error');
+    });
+  }
+
+  const savedLogo = getSavedData()?.logoImg;
+  if (savedLogo) {
+    setNavLogo(savedLogo);
+  }
+}
+
+function setNavLogo(src) {
+  const logoImg   = document.getElementById('navLogoImg');
+  const removeBtn = document.getElementById('btnLogoRemove');
+  if (src) {
+    if (logoImg) {
+      logoImg.src = src;
+      logoImg.style.display = 'inline-block';
+    }
+    if (removeBtn) removeBtn.style.display = '';
+  } else {
+    if (logoImg) {
+      logoImg.src = '';
+      logoImg.style.display = 'none';
+    }
+    if (removeBtn) removeBtn.style.display = 'none';
+  }
+}
+
 function initEditMode() {
+  initLogoUpload();
   const btn = document.getElementById('editToggleBtn');
   const navBtn = document.getElementById('navEditBtn');
   if (btn) btn.addEventListener('click', tryToggleEditMode);
@@ -1029,6 +1090,7 @@ function saveData(data) {
 
 function loadSavedEdits() {
   const data = getSavedData();
+  if (data.logoImg) setNavLogo(data.logoImg);
   if (data.text) {
     Object.entries(data.text).forEach(([key, val]) => {
       const el = document.querySelector(`[data-key="${key}"]`);
@@ -1324,10 +1386,8 @@ async function loadSavedMedia() {
 function showMediaUI() {
   const placeholder = document.getElementById('glbPlaceholder');
   const container   = document.getElementById('glbViewerContainer');
-  const addLabel    = document.getElementById('glbAddLabel');
   if (placeholder) placeholder.style.display = 'none';
   if (container)   container.style.display   = 'block';
-  if (addLabel && mediaList.length < MEDIA_MAX) addLabel.style.display = 'inline-flex';
   renderMediaDots();
 }
 
