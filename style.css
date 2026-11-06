@@ -755,3 +755,8 @@ body.edit-mode .glb-action-btn {
   background: var(--gold) !important;
   color: #000 !important;
 }
+
+.etool-publish{background:rgba(99,102,241,.4);border-color:rgba(99,102,241,.7)}
+.etool-publish:hover{background:rgba(99,102,241,.8)}
+.etool-token{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);padding:.4rem .7rem}
+.etool-token:hover{background:rgba(255,255,255,.25)}

@@ -16,7 +16,7 @@ window.addEventListener('error', function(e) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="style.css?v=20.2"/>
+  <link rel="stylesheet" href="style.css?v=20.3"/>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 </head>
 <body>
@@ -27,6 +27,8 @@ window.addEventListener('error', function(e) {
     <div class="edit-brand"><i class="fas fa-wand-magic-sparkles"></i><span>Edit Mode</span></div>
     <div class="edit-tools">
       <button class="etool etool-save" id="btnSave" onclick="saveAll()"><i class="fas fa-floppy-disk"></i> Save</button>
+      <button class="etool etool-publish" id="btnPublish" onclick="publishToGitHub()"><i class="fas fa-cloud-upload-alt"></i> Publish Live</button>
+      <button class="etool etool-token" id="btnToken" onclick="openGhTokenModal()" title="GitHub Token Setup"><i class="fab fa-github"></i></button>
       <button class="etool etool-softwares" id="btnManageSoftwares" onclick="openSoftwareModal()"><i class="fas fa-tags"></i> Software Tags</button>
       <button class="etool etool-reset" id="btnReset"><i class="fas fa-rotate-left"></i> Reset</button>
       <button class="etool etool-lock" id="btnLock" onclick="lockEditMode()" title="Lock & Logout"><i class="fas fa-lock"></i> Lock</button>
@@ -590,7 +592,7 @@ window.addEventListener('error', function(e) {
   </div>
 </div>
 
-<script src="script.js?v=20.2"></script>
+<script src="script.js?v=20.3"></script>
 <!-- REORDER MODELS & ANIMATIONS MODAL -->
 <div class="modal-overlay" id="glbReorderModal">
   <div class="modal-box" style="max-width:520px;">
@@ -608,6 +610,28 @@ window.addEventListener('error', function(e) {
     </div>
     <div class="modal-footer">
       <button type="button" class="btn-primary" onclick="closeReorderModal()"><i class="fas fa-check"></i> Done & Apply</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- GITHUB TOKEN MODAL -->
+<div class="modal-overlay" id="ghTokenModal" style="display:none" onclick="if(event.target===this)closeGhTokenModal()">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-header">
+      <h3 style="display:flex;align-items:center;gap:.5rem"><i class="fab fa-github"></i> GitHub Token Setup</h3>
+      <button class="modal-close" onclick="closeGhTokenModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" style="padding:1.5rem">
+      <p style="color:#ccc;margin-bottom:1rem">Publish Live button kaam karne ke liye ek <strong>GitHub Personal Access Token</strong> chahiye. Yeh sirf aapke browser mein save hota hai.</p>
+      <a href="https://github.com/settings/tokens/new?scopes=public_repo&description=Portfolio+CMS+Publish" target="_blank" rel="noopener" style="display:inline-block;margin-bottom:1rem;color:#38bdf8;text-decoration:none"><i class="fas fa-external-link-alt"></i> GitHub par click karein aur token banayein (public_repo scope)</a>
+      <input type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="width:100%;padding:.75rem 1rem;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;border-radius:10px;font-size:.9rem;box-sizing:border-box">
+      <p style="color:#888;font-size:.8rem;margin-top:.5rem"><i class="fas fa-shield-alt"></i> Token sirf aapke browser mein store hota hai — kahi send nahi hota siwaye GitHub API ke</p>
+    </div>
+    <div class="modal-footer" style="display:flex;gap:.75rem;justify-content:flex-end;padding:1rem 1.5rem">
+      <button class="btn-secondary" onclick="removeGhToken()" style="margin-right:auto"><i class="fas fa-trash"></i> Remove Token</button>
+      <button class="btn-secondary" onclick="closeGhTokenModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveGhToken()"><i class="fas fa-check"></i> Save & Publish</button>
     </div>
   </div>
 </div>
