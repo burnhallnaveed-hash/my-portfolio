@@ -53,42 +53,80 @@ function buildPublishPayload() {
   return updatedJson;
 }
 
+async function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 async function publishToGitHub() {
   const btn = document.getElementById('btnPublish');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing...'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing...'; }
 
-  const payload = buildPublishPayload();
-
-  // --- Primary: Local Publish Server ---
+  // --- Check if server is running ---
+  let serverRunning = false;
   try {
     const ctrl = new AbortController();
-    const tid  = setTimeout(() => ctrl.abort(), 2000);
+    const tid  = setTimeout(() => ctrl.abort(), 2500);
     const ping = await fetch(PUBLISH_SERVER + '/ping', { signal: ctrl.signal }).catch(() => null);
     clearTimeout(tid);
+    serverRunning = !!(ping && ping.ok);
+  } catch(e) { serverRunning = false; }
 
-    if (ping && ping.ok) {
-      showToast('\u2601\uFE0F Publish ho raha hai...', 'success');
-      const res = await fetch(PUBLISH_SERVER + '/publish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const json = await res.json();
-      if (json.ok) {
-        showToast('\uD83D\uDE80 Published! Clients ko 1-2 min mein update nazar aayega!');
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publish Live'; }
-        return;
-      }
-      throw new Error(json.message || 'Server error');
-    }
-  } catch (e) {
-    console.warn('Publish server not reachable:', e.message || e);
+  if (!serverRunning) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publish Live'; }
+    const modal = document.getElementById('ghTokenModal');
+    if (modal) modal.style.display = 'flex';
+    return;
   }
 
-  // --- Server not running: show instructions ---
+  // --- Build portfolio data ---
+  const portfolio = buildPublishPayload();
+
+  // --- Collect media from IndexedDB ---
+  if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Media load ho rahi hai...';
+  const idbItems = await dbGetAllItems();
+  const mediaPayload = [];
+  let skipped = 0;
+
+  for (const item of idbItems) {
+    if (!item.blob) continue;
+    const sizeMB = item.blob.size / (1024 * 1024);
+    if (sizeMB > 95) { skipped++; continue; } // GitHub 100MB limit
+    try {
+      const b64  = await blobToBase64(item.blob);
+      const ext  = item.type === 'glb' ? '.glb' : '.mp4';
+      const safe = (item.name || 'media').replace(/[^a-zA-Z0-9._-]/g, '_') + ext;
+      mediaPayload.push({ name: safe, displayName: item.name, type: item.type, dataBase64: b64, size: item.blob.size });
+    } catch(e) { console.warn('blob convert error:', e); }
+  }
+
+  if (skipped > 0) showToast(`⚠️ ${skipped} file(s) 95MB+ — skip ho gaye (too large)`, 'error');
+
+  // --- Send to publish server ---
+  if (btn) btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${mediaPayload.length} files push ho rahi hain...`;
+  showToast(`\u2601\uFE0F Publishing ${mediaPayload.length} media file(s)...`, 'success');
+
+  try {
+    const res  = await fetch(PUBLISH_SERVER + '/publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ portfolio, media: mediaPayload })
+    });
+    const json = await res.json();
+    if (json.ok) {
+      showToast(`\uD83D\uDE80 Published! ${json.mediaCount || 0} files live. 1-2 min mein update!`);
+    } else {
+      showToast('\u274C Publish fail: ' + (json.message || 'unknown'), 'error');
+    }
+  } catch(e) {
+    showToast('\u274C Network error: ' + e.message, 'error');
+  }
+
   if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publish Live'; }
-  const modal = document.getElementById('ghTokenModal');
-  if (modal) modal.style.display = 'flex';
 }
 
 /* ============================================================
@@ -1754,20 +1792,35 @@ async function handleUploadFiles(files) {
 }
 
 async function loadSavedMedia() {
-  const fromDB = await dbGetAllItems();
   mediaList = [];
 
-  fromDB.forEach(item => {
-    mediaList.push({
-      id: item.id,
-      name: item.name,
-      type: item.type,
-      url: URL.createObjectURL(item.blob),
-      rawBlob: item.blob
+  // --- Owner's browser: load from IndexedDB ---
+  const fromDB = await dbGetAllItems();
+  if (fromDB.length > 0) {
+    fromDB.forEach(item => {
+      mediaList.push({
+        id:      item.id,
+        name:    item.name,
+        type:    item.type,
+        url:     URL.createObjectURL(item.blob),
+        rawBlob: item.blob
+      });
     });
-  });
+  }
 
-  // If user has not uploaded anything, load fallback sample model so screen is never black!
+  // --- Visitor's browser: load from published portfolio.json ---
+  if (!mediaList.length && portfolioData && portfolioData._media && portfolioData._media.length > 0) {
+    portfolioData._media.forEach(item => {
+      mediaList.push({
+        id:   item.name,
+        name: item.displayName || item.name,
+        type: item.type,
+        url:  item.url
+      });
+    });
+  }
+
+  // --- Fallback: show default sample so screen is never black ---
   if (!mediaList.length) {
     mediaList.push(DEFAULT_SAMPLE_MODEL);
   }
