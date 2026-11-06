@@ -566,7 +566,7 @@ function initContactForm() {
 
     // --- Primary: Web3Forms (free, no client email app needed) ---
     // ACCESS KEY: Get yours free from https://web3forms.com (enter designcorner488@gmail.com)
-    const WEB3FORMS_KEY = 'YOUR_WEB3FORMS_ACCESS_KEY'; // <-- Replace this after signup
+    const WEB3FORMS_KEY = '006c9683-4571-4a5b-94ee-a8bd58cb0158'; // Web3Forms access key
 
     let sent = false;
 
