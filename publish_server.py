@@ -105,12 +105,15 @@ class PublishHandler(BaseHTTPRequestHandler):
             json.dump(portfolio, f, indent=2, ensure_ascii=False)
         print(f"  [E: Drive] portfolio.json saved ({len(json.dumps(portfolio))} bytes)")
 
-        # ---- Git commit + push ----
+        # ---- Git pull rebase + commit + push ----
         def git(*args):
             return subprocess.run(
                 ['git'] + list(args), cwd=REPO,
                 capture_output=True, text=True, encoding='utf-8', errors='replace'
             )
+
+        # Always pull latest remote changes first to prevent push rejection
+        git('pull', '--rebase', 'origin', BRANCH)
 
         git('add', 'portfolio.json')
         if os.path.isdir(media_dir):
@@ -121,9 +124,10 @@ class PublishHandler(BaseHTTPRequestHandler):
         print(c.stdout.strip() or c.stderr.strip() or '(no commit output)')
 
         p = git('push', 'origin', BRANCH)
-        print(p.stdout.strip() or p.stderr.strip() or '(no push output)')
+        push_output = (p.stdout or '') + ' ' + (p.stderr or '')
+        print(push_output.strip())
 
-        if p.returncode == 0:
+        if p.returncode == 0 or 'Everything up-to-date' in push_output:
             self._respond(200, {
                 'ok': True,
                 'mediaCount': len(published_media),
