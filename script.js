@@ -359,6 +359,7 @@ async function loadPortfolio() {
   renderGallery();
   renderAllGallery();
   initCounters();
+  try { await loadSavedMedia(); } catch(e) { console.warn(e); }
   setTimeout(initCursor, 100);
 }
 
@@ -1794,33 +1795,49 @@ async function handleUploadFiles(files) {
 async function loadSavedMedia() {
   mediaList = [];
 
-  // --- Owner's browser: load from IndexedDB ---
-  const fromDB = await dbGetAllItems();
-  if (fromDB.length > 0) {
-    fromDB.forEach(item => {
-      mediaList.push({
-        id:      item.id,
-        name:    item.name,
-        type:    item.type,
-        url:     URL.createObjectURL(item.blob),
-        rawBlob: item.blob
+  // 1. Owner browser: load from IndexedDB
+  try {
+    const fromDB = await dbGetAllItems();
+    if (fromDB && fromDB.length > 0) {
+      fromDB.forEach(item => {
+        mediaList.push({
+          id:      item.id,
+          name:    item.name,
+          type:    item.type,
+          url:     URL.createObjectURL(item.blob),
+          rawBlob: item.blob
+        });
       });
-    });
+    }
+  } catch(e) { console.warn('IDB load error:', e); }
+
+  // 2. Visitor browser (or if IndexedDB is empty): load from published portfolio.json
+  if (!mediaList.length) {
+    if (!portfolioData || !portfolioData._media) {
+      try {
+        const res = await fetch('portfolio.json?nc=' + Date.now());
+        if (res.ok) portfolioData = await res.json();
+      } catch(e) {
+        try {
+          const res = await fetch(DATA_URL);
+          if (res.ok) portfolioData = await res.json();
+        } catch(err) {}
+      }
+    }
+
+    if (portfolioData && portfolioData._media && portfolioData._media.length > 0) {
+      portfolioData._media.forEach(item => {
+        mediaList.push({
+          id:   item.name,
+          name: item.displayName || item.name,
+          type: item.type,
+          url:  item.url
+        });
+      });
+    }
   }
 
-  // --- Visitor's browser: load from published portfolio.json ---
-  if (!mediaList.length && portfolioData && portfolioData._media && portfolioData._media.length > 0) {
-    portfolioData._media.forEach(item => {
-      mediaList.push({
-        id:   item.name,
-        name: item.displayName || item.name,
-        type: item.type,
-        url:  item.url
-      });
-    });
-  }
-
-  // --- Fallback: show default sample so screen is never black ---
+  // 3. Fallback only if absolutely nothing exists
   if (!mediaList.length) {
     mediaList.push(DEFAULT_SAMPLE_MODEL);
   }
