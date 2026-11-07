@@ -40,7 +40,9 @@ function buildPublishPayload() {
   const aboutTitle = document.querySelector('[data-key="aboutTitle"]')?.textContent?.trim();
   const contactEm  = document.querySelector('[data-key="contactEmail"]')?.textContent?.trim();
   const contactPh  = document.querySelector('[data-key="contactPhone"]')?.textContent?.trim();
-  if (aboutTitle) updatedJson.settings.name    = aboutTitle;
+  const navName = document.querySelector('[data-key="navName"]')?.textContent?.trim();
+  if (navName) updatedJson.settings.name = navName;
+  else if (aboutTitle) updatedJson.settings.name = aboutTitle;
   if (heroLine2)  updatedJson.settings.tagline = heroLine2;
   if (heroDesc)   updatedJson.settings.title   = heroDesc;
   if (aboutText)  updatedJson.settings.about   = aboutText;
@@ -354,6 +356,7 @@ async function loadPortfolio() {
   }
 
   applySettings(portfolioData.settings);
+  loadSavedEdits();
   buildFilterBar(portfolioData.categories);
   filteredProjects = portfolioData.projects || [];
   renderGallery();
@@ -1392,6 +1395,15 @@ function saveData(data) {
 }
 
 function loadSavedEdits() {
+  // 1. Published overrides from portfolio.json (for visitors)
+  if (portfolioData && portfolioData._textOverrides) {
+    Object.entries(portfolioData._textOverrides).forEach(([key, val]) => {
+      const el = document.querySelector(`[data-key="${key}"]`);
+      if (el && val) el.innerHTML = val;
+    });
+  }
+
+  // 2. Local browser edits (for owner)
   const data = getSavedData();
   if (data.logoImg) setNavLogo(data.logoImg);
   if (data.text) {
